@@ -15,7 +15,6 @@ Desktop.ini
 .vscode/
 .idea/
 *.swp
-*~
 
 # --- Logs ---
 *.log
