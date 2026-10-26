@@ -1,0 +1,21 @@
+# --- ROS 2 / colcon (artefacts de build, à ne jamais versionner) ---
+**/build/
+**/install/
+**/log/
+ROS/workspace/**/__pycache__/
+*.pyc
+
+# --- Fichiers parasites Windows / WSL ---
+*Zone.Identifier*
+Thumbs.db
+Desktop.ini
+
+# --- OS / éditeurs ---
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
+# --- Logs ---
+*.log
