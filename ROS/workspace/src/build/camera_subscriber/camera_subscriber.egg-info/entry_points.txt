@@ -1,0 +1,2 @@
+[console_scripts]
+camera_viewer = camera_subscriber.CameraViewer:main

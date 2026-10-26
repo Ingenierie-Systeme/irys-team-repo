@@ -1,0 +1,35 @@
+[1.455s] Invoking command in '/home/noeca/ROS/workspace/src/camera_subscriber': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/noeca/ROS/workspace/src/build/camera_subscriber/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/noeca/ROS/workspace/src/install/camera_subscriber/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/camera_subscriber build --build-base /home/noeca/ROS/workspace/src/build/camera_subscriber/build install --record /home/noeca/ROS/workspace/src/build/camera_subscriber/install.log --install-scripts $base/lib/camera_subscriber --single-version-externally-managed install_data
+[1.744s] running egg_info
+[1.744s] creating ../build/camera_subscriber/camera_subscriber.egg-info
+[1.787s] writing ../build/camera_subscriber/camera_subscriber.egg-info/PKG-INFO
+[1.787s] writing dependency_links to ../build/camera_subscriber/camera_subscriber.egg-info/dependency_links.txt
+[1.788s] writing requirements to ../build/camera_subscriber/camera_subscriber.egg-info/requires.txt
+[1.788s] writing top-level names to ../build/camera_subscriber/camera_subscriber.egg-info/top_level.txt
+[1.788s] writing manifest file '../build/camera_subscriber/camera_subscriber.egg-info/SOURCES.txt'
+[1.837s] reading manifest file '../build/camera_subscriber/camera_subscriber.egg-info/SOURCES.txt'
+[1.838s] writing manifest file '../build/camera_subscriber/camera_subscriber.egg-info/SOURCES.txt'
+[1.838s] running build
+[1.838s] running build_py
+[1.839s] creating /home/noeca/ROS/workspace/src/build/camera_subscriber/build
+[1.839s] creating /home/noeca/ROS/workspace/src/build/camera_subscriber/build/lib
+[1.839s] creating /home/noeca/ROS/workspace/src/build/camera_subscriber/build/lib/camera_subscriber
+[1.840s] copying camera_subscriber/__init__.py -> /home/noeca/ROS/workspace/src/build/camera_subscriber/build/lib/camera_subscriber
+[1.840s] copying camera_subscriber/camera_subscriber_node.py -> /home/noeca/ROS/workspace/src/build/camera_subscriber/build/lib/camera_subscriber
+[1.840s] running install
+[1.845s] running install_lib
+[1.868s] creating /home/noeca/ROS/workspace/src/install/camera_subscriber/lib/python3.12/site-packages/camera_subscriber
+[1.868s] copying /home/noeca/ROS/workspace/src/build/camera_subscriber/build/lib/camera_subscriber/__init__.py -> /home/noeca/ROS/workspace/src/install/camera_subscriber/lib/python3.12/site-packages/camera_subscriber
+[1.868s] copying /home/noeca/ROS/workspace/src/build/camera_subscriber/build/lib/camera_subscriber/camera_subscriber_node.py -> /home/noeca/ROS/workspace/src/install/camera_subscriber/lib/python3.12/site-packages/camera_subscriber
+[1.869s] byte-compiling /home/noeca/ROS/workspace/src/install/camera_subscriber/lib/python3.12/site-packages/camera_subscriber/__init__.py to __init__.cpython-312.pyc
+[1.869s] byte-compiling /home/noeca/ROS/workspace/src/install/camera_subscriber/lib/python3.12/site-packages/camera_subscriber/camera_subscriber_node.py to camera_subscriber_node.cpython-312.pyc
+[1.870s] running install_data
+[1.870s] creating /home/noeca/ROS/workspace/src/install/camera_subscriber/share/ament_index
+[1.871s] creating /home/noeca/ROS/workspace/src/install/camera_subscriber/share/ament_index/resource_index
+[1.871s] creating /home/noeca/ROS/workspace/src/install/camera_subscriber/share/ament_index/resource_index/packages
+[1.871s] copying resource/camera_subscriber -> /home/noeca/ROS/workspace/src/install/camera_subscriber/share/ament_index/resource_index/packages
+[1.871s] copying package.xml -> /home/noeca/ROS/workspace/src/install/camera_subscriber/share/camera_subscriber
+[1.871s] running install_egg_info
+[1.896s] Copying ../build/camera_subscriber/camera_subscriber.egg-info to /home/noeca/ROS/workspace/src/install/camera_subscriber/lib/python3.12/site-packages/camera_subscriber-0.0.0-py3.12.egg-info
+[1.897s] running install_scripts
+[2.062s] writing list of installed files to '/home/noeca/ROS/workspace/src/build/camera_subscriber/install.log'
+[2.108s] Invoked command in '/home/noeca/ROS/workspace/src/camera_subscriber' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/noeca/ROS/workspace/src/build/camera_subscriber/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/noeca/ROS/workspace/src/install/camera_subscriber/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/camera_subscriber build --build-base /home/noeca/ROS/workspace/src/build/camera_subscriber/build install --record /home/noeca/ROS/workspace/src/build/camera_subscriber/install.log --install-scripts $base/lib/camera_subscriber --single-version-externally-managed install_data

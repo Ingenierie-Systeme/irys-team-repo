@@ -1,0 +1,16 @@
+[0.965s] Invoking command in '/home/noeca/ROS/workspace/src/sensor_subscriber': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/noeca/ROS/workspace/src/build/camera_subscriber/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/noeca/ROS/workspace/src/install/camera_subscriber/lib/python3.12/site-packages: /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/camera_subscriber build --build-base /home/noeca/ROS/workspace/src/build/camera_subscriber/build install --record /home/noeca/ROS/workspace/src/build/camera_subscriber/install.log --install-scripts $base/lib/camera_subscriber --single-version-externally-managed install_data
+[1.161s] running egg_info
+[1.175s] writing ../build/camera_subscriber/camera_subscriber.egg-info/PKG-INFO
+[1.175s] writing dependency_links to ../build/camera_subscriber/camera_subscriber.egg-info/dependency_links.txt
+[1.176s] writing entry points to ../build/camera_subscriber/camera_subscriber.egg-info/entry_points.txt
+[1.176s] writing requirements to ../build/camera_subscriber/camera_subscriber.egg-info/requires.txt
+[1.176s] writing top-level names to ../build/camera_subscriber/camera_subscriber.egg-info/top_level.txt
+[1.205s] reading manifest file '../build/camera_subscriber/camera_subscriber.egg-info/SOURCES.txt'
+[1.205s] writing manifest file '../build/camera_subscriber/camera_subscriber.egg-info/SOURCES.txt'
+[1.205s] running build
+[1.206s] running build_py
+[1.206s] running install
+[1.211s] running install_lib
+[1.227s] running install_data
+[1.227s] error: can't copy 'resource/camera_subscriber': doesn't exist or not a regular file
+[1.243s] Invoked command in '/home/noeca/ROS/workspace/src/sensor_subscriber' returned '1': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/noeca/ROS/workspace/src/build/camera_subscriber/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/noeca/ROS/workspace/src/install/camera_subscriber/lib/python3.12/site-packages: /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/camera_subscriber build --build-base /home/noeca/ROS/workspace/src/build/camera_subscriber/build install --record /home/noeca/ROS/workspace/src/build/camera_subscriber/install.log --install-scripts $base/lib/camera_subscriber --single-version-externally-managed install_data

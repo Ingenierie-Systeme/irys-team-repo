@@ -1,0 +1,24 @@
+[0.876s] Invoking command in '/home/noeca/ROS/workspace/src/sensor_subscriber': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/noeca/ROS/workspace/src/build/sensor_subscriber/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/noeca/ROS/workspace/src/install/sensor_subscriber/lib/python3.12/site-packages: /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/sensor_subscriber build --build-base /home/noeca/ROS/workspace/src/build/sensor_subscriber/build install --record /home/noeca/ROS/workspace/src/build/sensor_subscriber/install.log --install-scripts $base/lib/sensor_subscriber --single-version-externally-managed install_data
+[1.076s] running egg_info
+[1.090s] writing ../build/sensor_subscriber/sensor_subscriber.egg-info/PKG-INFO
+[1.091s] writing dependency_links to ../build/sensor_subscriber/sensor_subscriber.egg-info/dependency_links.txt
+[1.091s] writing entry points to ../build/sensor_subscriber/sensor_subscriber.egg-info/entry_points.txt
+[1.091s] writing requirements to ../build/sensor_subscriber/sensor_subscriber.egg-info/requires.txt
+[1.091s] writing top-level names to ../build/sensor_subscriber/sensor_subscriber.egg-info/top_level.txt
+[1.121s] reading manifest file '../build/sensor_subscriber/sensor_subscriber.egg-info/SOURCES.txt'
+[1.122s] writing manifest file '../build/sensor_subscriber/sensor_subscriber.egg-info/SOURCES.txt'
+[1.122s] running build
+[1.122s] running build_py
+[1.122s] copying sensor_subscriber/IMUViewer.py -> /home/noeca/ROS/workspace/src/build/sensor_subscriber/build/lib/sensor_subscriber
+[1.122s] running install
+[1.127s] running install_lib
+[1.153s] copying /home/noeca/ROS/workspace/src/build/sensor_subscriber/build/lib/sensor_subscriber/IMUViewer.py -> /home/noeca/ROS/workspace/src/install/sensor_subscriber/lib/python3.12/site-packages/sensor_subscriber
+[1.154s] byte-compiling /home/noeca/ROS/workspace/src/install/sensor_subscriber/lib/python3.12/site-packages/sensor_subscriber/IMUViewer.py to IMUViewer.cpython-312.pyc
+[1.155s] running install_data
+[1.155s] running install_egg_info
+[1.181s] removing '/home/noeca/ROS/workspace/src/install/sensor_subscriber/lib/python3.12/site-packages/sensor_subscriber-0.0.0-py3.12.egg-info' (and everything under it)
+[1.182s] Copying ../build/sensor_subscriber/sensor_subscriber.egg-info to /home/noeca/ROS/workspace/src/install/sensor_subscriber/lib/python3.12/site-packages/sensor_subscriber-0.0.0-py3.12.egg-info
+[1.183s] running install_scripts
+[1.285s] Installing camera_viewer script to /home/noeca/ROS/workspace/src/install/sensor_subscriber/lib/sensor_subscriber
+[1.286s] writing list of installed files to '/home/noeca/ROS/workspace/src/build/sensor_subscriber/install.log'
+[1.307s] Invoked command in '/home/noeca/ROS/workspace/src/sensor_subscriber' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/noeca/ROS/workspace/src/build/sensor_subscriber/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/noeca/ROS/workspace/src/install/sensor_subscriber/lib/python3.12/site-packages: /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/sensor_subscriber build --build-base /home/noeca/ROS/workspace/src/build/sensor_subscriber/build install --record /home/noeca/ROS/workspace/src/build/sensor_subscriber/install.log --install-scripts $base/lib/sensor_subscriber --single-version-externally-managed install_data

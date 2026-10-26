@@ -1,0 +1,4 @@
+[console_scripts]
+camera_viewer = sensor_subscriber.CameraViewer:main
+gnss_viewer = sensor_subscriber.GNSSViewer:main
+imu_viewer = sensor_subscriber.IMUViewer:main

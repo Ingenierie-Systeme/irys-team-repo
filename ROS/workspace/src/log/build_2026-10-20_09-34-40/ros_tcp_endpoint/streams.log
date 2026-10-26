@@ -1,0 +1,85 @@
+[1.105s] Invoking command in '/home/noeca/ROS/workspace/src/ROS-TCP-Endpoint': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/ros_tcp_endpoint build --build-base /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build install --record /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/install.log --install-scripts $base/lib/ros_tcp_endpoint --single-version-externally-managed install_data
+[1.211s] /usr/lib/python3/dist-packages/setuptools/dist.py:744: SetuptoolsDeprecationWarning: Invalid dash-separated options
+[1.211s] !!
+[1.211s] 
+[1.211s]         ********************************************************************************
+[1.211s]         Usage of dash-separated 'script-dir' will not be supported in future
+[1.211s]         versions. Please use the underscore name 'script_dir' instead.
+[1.211s] 
+[1.211s]         This deprecation is overdue, please update your project and remove deprecated
+[1.211s]         calls to avoid build errors in the future.
+[1.211s] 
+[1.211s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[1.211s]         ********************************************************************************
+[1.211s] 
+[1.211s] !!
+[1.211s]   opt = self.warn_dash_deprecation(opt, section)
+[1.361s] running egg_info
+[1.361s] creating ../build/ros_tcp_endpoint/ros_tcp_endpoint.egg-info
+[1.381s] writing ../build/ros_tcp_endpoint/ros_tcp_endpoint.egg-info/PKG-INFO
+[1.381s] writing dependency_links to ../build/ros_tcp_endpoint/ros_tcp_endpoint.egg-info/dependency_links.txt
+[1.381s] writing entry points to ../build/ros_tcp_endpoint/ros_tcp_endpoint.egg-info/entry_points.txt
+[1.382s] writing requirements to ../build/ros_tcp_endpoint/ros_tcp_endpoint.egg-info/requires.txt
+[1.382s] writing top-level names to ../build/ros_tcp_endpoint/ros_tcp_endpoint.egg-info/top_level.txt
+[1.382s] writing manifest file '../build/ros_tcp_endpoint/ros_tcp_endpoint.egg-info/SOURCES.txt'
+[1.423s] reading manifest file '../build/ros_tcp_endpoint/ros_tcp_endpoint.egg-info/SOURCES.txt'
+[1.423s] adding license file 'LICENSE'
+[1.424s] writing manifest file '../build/ros_tcp_endpoint/ros_tcp_endpoint.egg-info/SOURCES.txt'
+[1.424s] running build
+[1.424s] running build_py
+[1.424s] creating /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build
+[1.424s] creating /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib
+[1.424s] creating /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint
+[1.425s] copying ros_tcp_endpoint/client.py -> /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint
+[1.425s] copying ros_tcp_endpoint/exceptions.py -> /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint
+[1.425s] copying ros_tcp_endpoint/__init__.py -> /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint
+[1.425s] copying ros_tcp_endpoint/thread_pauser.py -> /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint
+[1.425s] copying ros_tcp_endpoint/subscriber.py -> /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint
+[1.425s] copying ros_tcp_endpoint/tcp_sender.py -> /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint
+[1.425s] copying ros_tcp_endpoint/unity_service.py -> /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint
+[1.426s] copying ros_tcp_endpoint/default_server_endpoint.py -> /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint
+[1.426s] copying ros_tcp_endpoint/service.py -> /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint
+[1.426s] copying ros_tcp_endpoint/communication.py -> /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint
+[1.426s] copying ros_tcp_endpoint/publisher.py -> /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint
+[1.426s] copying ros_tcp_endpoint/server.py -> /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint
+[1.426s] running install
+[1.430s] running install_lib
+[1.451s] creating /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint
+[1.451s] copying /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint/client.py -> /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint
+[1.451s] copying /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint/exceptions.py -> /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint
+[1.452s] copying /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint/__init__.py -> /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint
+[1.452s] copying /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint/thread_pauser.py -> /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint
+[1.452s] copying /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint/subscriber.py -> /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint
+[1.452s] copying /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint/tcp_sender.py -> /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint
+[1.452s] copying /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint/unity_service.py -> /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint
+[1.452s] copying /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint/default_server_endpoint.py -> /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint
+[1.452s] copying /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint/service.py -> /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint
+[1.452s] copying /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint/communication.py -> /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint
+[1.453s] copying /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint/publisher.py -> /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint
+[1.453s] copying /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build/lib/ros_tcp_endpoint/server.py -> /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint
+[1.453s] byte-compiling /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint/client.py to client.cpython-312.pyc
+[1.454s] byte-compiling /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint/exceptions.py to exceptions.cpython-312.pyc
+[1.454s] byte-compiling /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint/__init__.py to __init__.cpython-312.pyc
+[1.454s] byte-compiling /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint/thread_pauser.py to thread_pauser.cpython-312.pyc
+[1.455s] byte-compiling /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint/subscriber.py to subscriber.cpython-312.pyc
+[1.455s] byte-compiling /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint/tcp_sender.py to tcp_sender.cpython-312.pyc
+[1.456s] byte-compiling /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint/unity_service.py to unity_service.cpython-312.pyc
+[1.456s] byte-compiling /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint/default_server_endpoint.py to default_server_endpoint.cpython-312.pyc
+[1.457s] byte-compiling /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint/service.py to service.cpython-312.pyc
+[1.457s] byte-compiling /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint/communication.py to communication.cpython-312.pyc
+[1.457s] byte-compiling /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint/publisher.py to publisher.cpython-312.pyc
+[1.457s] byte-compiling /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint/server.py to server.cpython-312.pyc
+[1.459s] running install_data
+[1.459s] creating /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/share/ament_index
+[1.459s] creating /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/share/ament_index/resource_index
+[1.460s] creating /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/share/ament_index/resource_index/packages
+[1.460s] copying resource/ros_tcp_endpoint -> /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/share/ament_index/resource_index/packages
+[1.460s] copying package.xml -> /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/share/ros_tcp_endpoint
+[1.460s] creating /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/share/ros_tcp_endpoint/launch
+[1.460s] copying launch/endpoint.py -> /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/share/ros_tcp_endpoint/launch
+[1.460s] running install_egg_info
+[1.482s] Copying ../build/ros_tcp_endpoint/ros_tcp_endpoint.egg-info to /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages/ros_tcp_endpoint-0.0.1-py3.12.egg-info
+[1.483s] running install_scripts
+[1.633s] Installing default_server_endpoint script to /home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/ros_tcp_endpoint
+[1.634s] writing list of installed files to '/home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/install.log'
+[1.652s] Invoked command in '/home/noeca/ROS/workspace/src/ROS-TCP-Endpoint' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/noeca/ROS/workspace/src/install/ros_tcp_endpoint/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/ros_tcp_endpoint build --build-base /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/build install --record /home/noeca/ROS/workspace/src/build/ros_tcp_endpoint/install.log --install-scripts $base/lib/ros_tcp_endpoint --single-version-externally-managed install_data
