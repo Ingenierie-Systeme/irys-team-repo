@@ -10,7 +10,7 @@ using UnityEngine;
 
 /// </summary>
 [RequireComponent(typeof(ConfigurableJoint))]
-public class MasseMobileController : MonoBehaviour
+public class MasseMobileController_RB : MonoBehaviour
 {
     [Header("Déplacement")]
     [Tooltip("Vitesse de la consigne (m/s)")]

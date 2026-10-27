@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class servo : MonoBehaviour
+public class servo_RB : MonoBehaviour
 {
     [Header("Rotation")]
     [Tooltip("Vitesse de la consigne (°/s)")]

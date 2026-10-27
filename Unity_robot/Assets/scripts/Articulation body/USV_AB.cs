@@ -1,14 +1,10 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-//simulation d'un USV avec comportement de flotabilité plus réaliste 
-// par maillage du volume
-// L'USV nécessite d'avoir un RigidBody pour l'application des forces et un ou plusieurs colliders pour le calcul de la flottaison
-
-public class USV : MonoBehaviour
+// Simulation d'un USV avec comportement de flottabilité par échantillonnage du volume.
+// en utilisant un articulated body
+public class USV_AB : MonoBehaviour
 {
-    public Rigidbody rb;
-    public bool useKeyboard = true; // activer contrôles clavier
+    public ArticulationBody articulationBody;
 
     public float waterDensity = 1000f; // densité de l'eau (kg/m^3)
 
@@ -18,22 +14,34 @@ public class USV : MonoBehaviour
     [Range(4, 40)]
     public int samplesPerAxis = 8;
 
-
     [Header("Valeurs calculées")]
     [SerializeField] float submergedVolume;
     [SerializeField] Vector3 centerOfBuoyancy;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        if (rb == null)
-            rb = GetComponent<Rigidbody>();
+        if (articulationBody == null)
+            articulationBody = GetComponentInParent<ArticulationBody>();
+
+        if (articulationBody == null)
+        {
+            Debug.LogError("USV_AB nécessite une ArticulationBody assignée ou présente sur elle-même/un parent.", this);
+            enabled = false;
+            return;
+        }
+
+        if (samplesPerAxis <= 0)
+        {
+            Debug.LogError("samplesPerAxis doit être supérieur à zéro.", this);
+            enabled = false;
+            return;
+        }
 
         if (buoyancyColliders == null || buoyancyColliders.Length == 0)
             buoyancyColliders = GetComponentsInChildren<Collider>();
-
     }
-    private void add_buoyancy_force()
+
+    private void AddBuoyancyForce()
     {
         submergedVolume = 0f;
         Vector3 weightedCenter = Vector3.zero;
@@ -77,21 +85,18 @@ public class USV : MonoBehaviour
         centerOfBuoyancy = weightedCenter / submergedVolume;
 
         float buoyancyMagnitude = waterDensity * Physics.gravity.magnitude * submergedVolume;
-        rb.AddForceAtPosition(Vector3.up * buoyancyMagnitude,
+        articulationBody.AddForceAtPosition(Vector3.up * buoyancyMagnitude,
             centerOfBuoyancy, ForceMode.Force);
     }
 
-    bool IsInsideCollider(Collider collider, Vector3 point)
+    private bool IsInsideCollider(Collider collider, Vector3 point)
     {
         Vector3 closestPoint = collider.ClosestPoint(point);
         return (closestPoint - point).sqrMagnitude < 0.00000001f;
     }
 
-    
-    // Update is called once per frame
     void FixedUpdate()
     {
-        add_buoyancy_force();
-       
+        AddBuoyancyForce();
     }
 }
