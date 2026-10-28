@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nPanels: 6
   densiteEau: 1000
-  coefTraineeNormale: 10
+  coefTraineeNormale: 150
   coefTraineeTangentielle: 0.05
   waterLevel: 0
   waterVelocity: {x: 0, y: 0, z: 0}
