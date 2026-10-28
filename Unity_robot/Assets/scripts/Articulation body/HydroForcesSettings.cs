@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "HydroForcesSettings", menuName = "Robot/Hydro Forces Settings")]
 public class HydroForcesSettings : ScriptableObject
@@ -27,4 +28,12 @@ public class HydroForcesSettings : ScriptableObject
     public float facteurPortance = 1f;
     [Range(1f, 45f)]
     public float angleDecrochage = 15f;
+
+    [Header("Articulation")]
+    [Min(0f)]
+    [FormerlySerializedAs("articulationstiffness")]
+    public float articulationStiffness = 20f;
+    [Min(0f)]
+    [FormerlySerializedAs("articulationdamping")]
+    public float articulationDamping = 10f;
 }

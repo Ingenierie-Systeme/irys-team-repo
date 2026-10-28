@@ -8,7 +8,7 @@ using RosMessageTypes.BuiltinInterfaces;
 
 /// Simule une IMU : publie orientation, vitesses angulaires et accélération
 /// sur sensor_msgs/msg/Imu (topic /imu/data) via ROS-TCP-Connector.
-/// Placez ce composant sur un GameObject avec un Rigidbody.
+/// Placez ce composant sur un GameObject enfant d'une ArticulationBody.
 
 public class IMU : MonoBehaviour
 {
@@ -19,34 +19,39 @@ public class IMU : MonoBehaviour
     public float publishPeriod = 0.02f;
 
     [Header("Références")]
-    public Rigidbody rb;
+    public ArticulationBody articulationBody;
 
     [Header("Options")]
-    [Tooltip("Ajouter la gravité à l'accélération mesurée (une vraie IMU la mesure)")]
+    [Tooltip("Inclure la gravité ressentie par une IMU au repos")]
     public bool includeGravity = true;
 
     private ROSConnection ros;
 
     // État interne
     private Quaternion orientation;      // orientation dans le repère ROS
-    private Vector3 linSpeed;           // vitesse linéaire (repère monde Unity)
-    private Vector3 prevLinSpeed;       // vitesse à l'itération physique précédente
-    private Vector3 angSpeed;           // vitesse angulaire (repère corps, rad/s)
+    private Vector3 pointVelocity;      // vitesse au point capteur (repère monde)
+    private Vector3 prevPointVelocity;  // vitesse au point capteur précédente
+    private Vector3 angSpeed;           // vitesse angulaire (repère capteur, rad/s)
     private Vector3 linAcc;             // accélération linéaire
     private float lastPublishTime;
     private bool hasPrevSpeed;          // évite un pic d'accélération au 1er frame
 
-    // Conversion Unity (gaucher, Y-up) -> ROS (droitier, Z-up)
-    static readonly Quaternion UnityToRosRotation =
-        Quaternion.Euler(0f, 180f, 0f) * Quaternion.Euler(-90f, 0f, 0f);
-
     void Start()
     {
-        if (rb == null)
-            rb = GetComponent<Rigidbody>();
-        if (rb == null)
+        if (articulationBody == null)
+            articulationBody = GetComponentInParent<ArticulationBody>();
+        if (articulationBody == null)
         {
-            Debug.LogError("IMU nécessite un Rigidbody.");
+            Debug.LogError(
+                "IMU nécessite une ArticulationBody sur elle-même ou un parent.",
+                this);
+            enabled = false;
+            return;
+        }
+
+        if (publishPeriod <= 0f)
+        {
+            Debug.LogError("La période de publication IMU doit être positive.", this);
             enabled = false;
             return;
         }
@@ -55,38 +60,43 @@ public class IMU : MonoBehaviour
         ros.RegisterPublisher<ImuMsg>(topicName);
     }
 
-    // Toute la physique dans FixedUpdate : les vitesses du Rigidbody
-    // ne sont fiables qu'après le pas de simulation physique.
+    // Toute la physique est lue dans FixedUpdate après le pas de simulation.
     void FixedUpdate()
     {
         float dt = Time.fixedDeltaTime;
 
-        // Vitesse angulaire : rb.angularVelocity est déjà en rad/s dans le
-        // repère du corps, mais repère Unity -> convertir vers ROS.
-        angSpeed = UnityToRos(rb.angularVelocity);
+        // ArticulationBody fournit les vitesses dans le repère monde Unity.
+        Quaternion sensorRotation = transform.rotation;
+        Vector3 angularVelocitySensor =
+            Quaternion.Inverse(sensorRotation) * articulationBody.angularVelocity;
+        angSpeed = UnityToRos(angularVelocitySensor);
 
-        // Accélération linéaire : dérivée de la vitesse.
-        // Une IMU mesure l'accélération dans SON repère (body frame),
-        // on ré-exprime donc l'accélération monde dans le repère du corps.
-        linSpeed = rb.linearVelocity;
+        // Échantillonner la vitesse au capteur inclut l'effet de la rotation
+        // si celui-ci est décalé du centre de l'ArticulationBody.
+        pointVelocity = articulationBody.GetPointVelocity(transform.position);
         if (hasPrevSpeed)
         {
-            Vector3 accWorld = (linSpeed - prevLinSpeed) / dt;
+            Vector3 accWorld = (pointVelocity - prevPointVelocity) / dt;
             if (includeGravity)
-                accWorld += Physics.gravity;
-            // Rotation monde -> corps (inverse de la rotation du corps)
-            linAcc = UnityToRos(Quaternion.Inverse(transform.rotation) * accWorld);
+                accWorld -= Physics.gravity;
+            Vector3 accelerationSensor =
+                Quaternion.Inverse(sensorRotation) * accWorld;
+            linAcc = UnityToRos(accelerationSensor);
         }
-        prevLinSpeed = linSpeed;
+        else
+        {
+            linAcc = Vector3.zero;
+        }
+        prevPointVelocity = pointVelocity;
         hasPrevSpeed = true;
 
-        // Orientation : rotation du corps, convertie vers le repère ROS.
-        orientation = UnityToRosRotation * transform.parent.rotation;
+        // Orientation du capteur, convertie vers le repère ROS.
+        orientation = UnityToRosOrientation(sensorRotation);
 
         // Publication à fréquence fixe, indépendante du FixedUpdate
-        if (Time.time - lastPublishTime >= publishPeriod)
+        if (Time.fixedTime - lastPublishTime >= publishPeriod)
         {
-            lastPublishTime = Time.time;
+            lastPublishTime = Time.fixedTime;
             PublishImu();
         }
     }
@@ -97,6 +107,12 @@ public class IMU : MonoBehaviour
         // (même transformation que UnityToRosRotation) :
         // Unity (x,y,z) -> ROS (z, -x, y)
         return new Vector3(v.z, -v.x, v.y);
+    }
+
+    static Quaternion UnityToRosOrientation(Quaternion rotation)
+    {
+        // Changement de base gaucher/droitier, cohérent avec UnityToRos.
+        return new Quaternion(-rotation.z, rotation.x, -rotation.y, rotation.w);
     }
 
     ImuMsg BuildMsg()

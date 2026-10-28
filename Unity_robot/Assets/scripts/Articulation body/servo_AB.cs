@@ -62,6 +62,20 @@ public class servo_AB : MonoBehaviour
         if (Input.GetKey(toucheGauche)) direction += 1f;
     }
 
+    public void SetAngleCommand(float angleDegrees)
+    {
+        thConsigne = Mathf.Clamp(angleDegrees, -angleMax, angleMax);
+
+        ArticulationDrive drive = articulationBody.xDrive;
+        drive.target = thConsigne;
+        articulationBody.xDrive = drive;
+    }
+
+    public void SetAngleCommandRadians(float angleRadians)
+    {
+        SetAngleCommand(angleRadians * Mathf.Rad2Deg);
+    }
+
     void FixedUpdate()
     {
         thConsigne = Mathf.Clamp(thConsigne + direction * vitesse * Time.fixedDeltaTime,

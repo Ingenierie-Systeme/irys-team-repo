@@ -22,3 +22,5 @@ MonoBehaviour:
   utiliserPortance: 0
   facteurPortance: 2
   angleDecrochage: 15
+  articulationstiffness: 200
+  articulationdamping: 50

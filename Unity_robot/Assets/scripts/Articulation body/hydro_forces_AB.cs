@@ -1,6 +1,7 @@
 using UnityEngine;
 
 // Calcul des forces hydrodynamiques appliquées sur un segment de nageoire.
+
 [RequireComponent(typeof(MeshFilter))]
 public class Nageoire_AB : MonoBehaviour
 {
@@ -43,9 +44,10 @@ public class Nageoire_AB : MonoBehaviour
         if (settings.nPanels <= 0 || settings.echantillonsImmersion <= 0 ||
             settings.densiteEau < 0f || settings.coefTraineeNormale < 0f ||
             settings.coefTraineeTangentielle < 0f || settings.facteurPortance < 0f ||
-            settings.angleDecrochage <= 0f)
+            settings.angleDecrochage <= 0f || settings.articulationStiffness < 0f ||
+            settings.articulationDamping < 0f)
         {
-            Debug.LogError("Les nombres d'échantillons doivent être positifs et les coefficients non négatifs.", this);
+            Debug.LogError("Les nombres d'échantillons doivent être positifs et les coefficients, stiffness et damping non négatifs.", this);
             enabled = false;
             return;
         }
@@ -63,6 +65,16 @@ public class Nageoire_AB : MonoBehaviour
             Debug.LogError("L'échelle ou l'orientation de la nageoire produit une surface nulle.", this);
             enabled = false;
         }
+        articulationBody.xDrive = ConfigurerDrive(articulationBody.xDrive);
+        articulationBody.yDrive = ConfigurerDrive(articulationBody.yDrive);
+        articulationBody.zDrive = ConfigurerDrive(articulationBody.zDrive);
+    }
+
+    private ArticulationDrive ConfigurerDrive(ArticulationDrive drive)
+    {
+        drive.stiffness = settings.articulationStiffness;
+        drive.damping = settings.articulationDamping;
+        return drive;
     }
 
     void FixedUpdate()
