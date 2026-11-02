@@ -12,6 +12,7 @@
   <exec_depend>ros_tcp_endpoint</exec_depend>
   <exec_depend>sensor_subscriber</exec_depend>
   <exec_depend>robot_brain</exec_depend>
+  <exec_depend>robot_control</exec_depend>
   <exec_depend>robot_pose</exec_depend>
 
   <export>

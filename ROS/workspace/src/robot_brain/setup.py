@@ -27,6 +27,8 @@ setup(
         'console_scripts': [
             'optical_flow_emergency_stop = '
             'robot_brain.optical_flow_emergency_stop:main',
+            'camera_obstacle_avoidance = '
+            'robot_brain.camera_obstacle_avoidance:main',
         ],
     },
 )

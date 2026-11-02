@@ -34,7 +34,7 @@ public class GNSS : MonoBehaviour
     [Tooltip("Ajouter du bruit gaussien sur la position (mètres, écart-type)")]
     public float noiseStdDev = 0f;
     [Tooltip("perte de connexion en profondeur")]
-    public float p_lost = 5f;
+    public float p_lost = 1f;
 
     private ROSConnection ros;
     private Vector3 position;

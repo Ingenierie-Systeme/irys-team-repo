@@ -43,6 +43,16 @@ def generate_launch_description():
             description='Démarrer le moniteur TTC par flux optique.',
         ),
         DeclareLaunchArgument(
+            'start_camera_avoidance',
+            default_value='true',
+            description='Démarrer le choix de direction par caméra.',
+        ),
+        DeclareLaunchArgument(
+            'start_servo_controller',
+            default_value='true',
+            description='Démarrer la conversion de direction en commandes servo.',
+        ),
+        DeclareLaunchArgument(
             'start_state_estimator',
             default_value='true',
             description='Démarrer l’estimateur d’état du robot.',
@@ -85,6 +95,24 @@ def generate_launch_description():
             output='screen',
             condition=IfCondition(
                 LaunchConfiguration('start_obstacle_monitor')
+            ),
+        ),
+        Node(
+            package='robot_brain',
+            executable='camera_obstacle_avoidance',
+            name='camera_obstacle_avoidance',
+            output='screen',
+            condition=IfCondition(
+                LaunchConfiguration('start_camera_avoidance')
+            ),
+        ),
+        Node(
+            package='robot_control',
+            executable='servo_command_publisher',
+            name='servo_command_publisher',
+            output='screen',
+            condition=IfCondition(
+                LaunchConfiguration('start_servo_controller')
             ),
         ),
         Node(

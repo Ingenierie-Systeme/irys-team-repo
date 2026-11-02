@@ -12,14 +12,15 @@
     - recalibration au GPS en surface
     - publication sur topic `/robot/pose` (position, vitesse et inclinaison)
 - estimation de la sécurité et navigation (package `robot_brain`)
-    - choix de la trajectoire à adopter en fonction des informations
-    - évitement d'obstacles grâce à la caméra (détermination d'un chemin safe)
+    - estimation heuristique du temps avant collision dans trois secteurs caméra
+    - choix d'une direction locale pour éviter un obstacle visible
+    - suivi de mur visuel
     - arrêt d'urgence si obstacle trop proche via flux optique (`robot_brain/optical_flow_emergency_stop.py`)
     - publication sur le topic `/robot/direction` (direction vers laquelle le robot doit se diriger, en prenant en compte sa manoeuvrabilité limité)
 - commandes des servo-moteurs (package `robot_control`)
-    - récupère la consigne de direction et la convertit en commande pour les servo-moteurs, en prennant en compte l'état du robot, son inertie 
-    - nageoire pour le déplacement : `/servo/angle_nage`
-    - masse mobile pour l'inclinaison : `/servo/angle_mass` (angle déterminé à partir de la position désirée de la masse mobile sur son axe)
+    - convertit la direction en consignes pour les servo-moteurs
+    - nageoire pour le déplacement : `/servo/nageoire_cmd`
+    - masse mobile pour l'inclinaison : `/servo/masse_cmd`
 
 ## Comportement du robot
 
@@ -62,7 +63,9 @@ IMU, GNSS et caméra peuvent être désactivés séparément avec
 `start_imu_viewer:=false`, `start_gnss_viewer:=false` ou
 `start_camera_viewer:=false`. Le moniteur de sécurité peut être désactivé avec
 `start_obstacle_monitor:=false`. L'estimateur d'état peut être désactivé avec
-`start_state_estimator:=false`. L'adresse et le port peuvent être changés avec
+`start_state_estimator:=false`. L'évitement caméra peut être désactivé avec
+`start_camera_avoidance:=false`. Le contrôleur servo peut être désactivé avec
+`start_servo_controller:=false`. L'adresse et le port peuvent être changés avec
 `tcp_ip:=0.0.0.0` et `tcp_port:=10000`.
 
 ## Estimation de l'état du robot
@@ -101,13 +104,13 @@ conformément à la configuration Unity actuelle.
 Le nœud `robot_brain/optical_flow_emergency_stop` lit `/camera/image`, estime
 le temps avant collision à partir de l'expansion radiale du flux optique et
 publie un `std_msgs/msg/Bool` sur `/safety/emergency_stop`. `true` signifie
-arrêt actif. Le seuil TTC est configurable (1 seconde par défaut) :
+arrêt actif. Le seuil TTC est configurable (2 secondes par défaut) :
 
 ```bash
 ros2 run robot_brain optical_flow_emergency_stop --ros-args \
   -p image_topic:=/camera/image \
   -p stop_topic:=/safety/emergency_stop \
-  -p ttc_threshold_seconds:=1.0
+  -p ttc_threshold_seconds:=2.0
 ```
 
 Le nœud publie aussi l'arrêt au démarrage, pendant l'attente de deux images
@@ -120,16 +123,50 @@ ne fournit pas une distance métrique et ne remplace pas un dispositif de
 sécurité certifié. Aucun contrôleur moteur n'étant actuellement connecté à ce
 topic, le nœud publie l'état d'arrêt mais n'immobilise pas seul le robot.
 
+## Estimation des obstacles et choix de direction
+
+Le nœud `robot_brain/camera_obstacle_avoidance` analyse le flux de
+`/camera/image` et estime un TTC heuristique dans les secteurs gauche, centre
+et droit. Il garde le cap avant tant que le secteur central ne paraît pas
+dangereux, puis choisit une diagonale vers le côté dont le TTC paraît le plus
+élevé. Si aucun côté ne semble sûr, si la caméra expire ou si
+`/safety/emergency_stop` vaut `true`, il publie un vecteur nul.
+
+La consigne est un `geometry_msgs/msg/Vector3Stamped` sur `/robot/direction`,
+exprimé dans `base_link` avec `x` vers l'avant, `y` vers la gauche et `z` vers
+le haut. Les choix sont avant `(1, 0, 0)`, diagonale `(0.5, ±0.866, 0)` ou arrêt
+`(0, 0, 0)`. Le seuil TTC est de 2 secondes par défaut et peut être réglé avec
+`minimum_time_to_contact`. Le nœud s'utilise seul ainsi :
+
+```bash
+ros2 run robot_brain camera_obstacle_avoidance --ros-args \
+  -p image_topic:=/camera/image \
+  -p direction_topic:=/robot/direction \
+  -p minimum_time_to_contact:=2.0
+```
+
+Cette perception caméra seule ne fournit ni distance métrique ni garantie de
+dégagement : les TTC reposent sur l'hypothèse d'une expansion radiale autour
+du centre de l'image. Le nœud ne suit donc pas une paroi à distance donnée.
+Le suivi de mur devra attendre une source de profondeur calibrée (par exemple
+le `PointCloud2` simulé sur `/lidar/points`) et l'installation d'un capteur
+équivalent sur le robot réel.
+
 ## Commande du servo
 
-Lancer le publisher de consigne sinusoïdale :
+Le nœud `robot_control/servo_command_publisher` lit le
+`geometry_msgs/msg/Vector3Stamped` de `/robot/direction` et publie des
+`std_msgs/msg/Float64` sur `/servo/nageoire_cmd` et `/servo/masse_cmd`, à
+50 Hz. L'angle de la nageoire suit le cap du vecteur `(x, y)` avec une
+oscillation sinusoïdale d'amplitude maximale 40° et de période 5 secondes.
+L'amplitude suit la norme du vecteur (les vecteurs directionnels actuels ont
+une norme de 1 et l'arrêt une norme de 0) ; la consigne est limitée à ±90°.
+L'angle de la masse est proportionnel à `x`, borné à ±50° ; une direction
+nulle recentre les deux servos.
 
 ```bash
 ros2 run robot_control servo_command_publisher
 ```
-
-Le nœud publie `std_msgs/msg/Float64` sur `/servo_angle_cmd` à 50 Hz, avec une
-amplitude de 40 degrés et une période de 5 secondes.
 
 ## Création d'un package
 
