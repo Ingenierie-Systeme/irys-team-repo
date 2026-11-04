@@ -1,11 +1,14 @@
+using RosMessageTypes.Std;
+using Unity.Robotics.ROSTCPConnector;
 using UnityEngine;
 
-/// <summary>
-/// Contrôle au clavier la rotation d'une articulation revolute.
-/// </summary>
+
 [RequireComponent(typeof(ArticulationBody))]
 public class servo_AB : MonoBehaviour
 {
+    [Header("ROS")]
+    [SerializeField] private string topicName = "/servo/nageoire_cmd";
+
     [Header("Rotation")]
     [Tooltip("Vitesse de la consigne (°/s)")]
     public float vitesse = 5f;
@@ -20,6 +23,9 @@ public class servo_AB : MonoBehaviour
     private ArticulationBody articulationBody;
     private float thConsigne;
     private float direction;
+    private float positionVoulue;
+    private float decalageClavier;
+    private ROSConnection ros;
 
     void Start()
     {
@@ -38,8 +44,20 @@ public class servo_AB : MonoBehaviour
             return;
         }
 
+        if (vitesse <= 0f)
+        {
+            Debug.LogError("La vitesse doit être supérieure à zéro.", this);
+            enabled = false;
+            return;
+        }
+
         thConsigne = 0f;
+        positionVoulue = 0f;
+        decalageClavier = 0f;
         ConfigurerDrive();
+
+        ros = ROSConnection.GetOrCreateInstance();
+        ros.Subscribe<Float64Msg>(topicName, OnAngleMessage);
     }
 
     private void ConfigurerDrive()
@@ -64,11 +82,13 @@ public class servo_AB : MonoBehaviour
 
     public void SetAngleCommand(float angleDegrees)
     {
-        thConsigne = Mathf.Clamp(angleDegrees, -angleMax, angleMax);
+        if (float.IsNaN(angleDegrees) || float.IsInfinity(angleDegrees))
+        {
+            Debug.LogWarning("La consigne du servo doit être un angle fini.", this);
+            return;
+        }
 
-        ArticulationDrive drive = articulationBody.xDrive;
-        drive.target = thConsigne;
-        articulationBody.xDrive = drive;
+        positionVoulue = Mathf.Clamp(angleDegrees, -angleMax, angleMax);
     }
 
     public void SetAngleCommandRadians(float angleRadians)
@@ -76,10 +96,29 @@ public class servo_AB : MonoBehaviour
         SetAngleCommand(angleRadians * Mathf.Rad2Deg);
     }
 
+    private void OnAngleMessage(Float64Msg message)
+    {
+        SetAngleCommand((float)message.data);
+    }
+
     void FixedUpdate()
     {
-        thConsigne = Mathf.Clamp(thConsigne + direction * vitesse * Time.fixedDeltaTime,
-                                 -angleMax, angleMax);
+        float deltaTime = Time.fixedDeltaTime;
+        decalageClavier = Mathf.Clamp(
+            decalageClavier + direction * vitesse * deltaTime,
+            -angleMax,
+            angleMax
+        );
+        float cible = Mathf.Clamp(
+            positionVoulue + decalageClavier,
+            -angleMax,
+            angleMax
+        );
+        thConsigne = Mathf.MoveTowards(
+            thConsigne,
+            cible,
+            vitesse * deltaTime
+        );
 
         ArticulationDrive drive = articulationBody.xDrive;
         drive.target = thConsigne;

@@ -29,6 +29,7 @@ setup(
             'robot_brain.optical_flow_emergency_stop:main',
             'camera_obstacle_avoidance = '
             'robot_brain.camera_obstacle_avoidance:main',
+            'robot_brain = robot_brain.robot_brain:main',
         ],
     },
 )

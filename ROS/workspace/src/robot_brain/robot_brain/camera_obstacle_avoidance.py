@@ -33,7 +33,11 @@ class CameraObstacleAvoidance(Node):
     def __init__(self) -> None:
         super().__init__('camera_obstacle_avoidance')
         self.declare_parameter('image_topic', '/camera/image')  # réception de la caméra
-        self.declare_parameter('direction_topic', '/robot/direction')  # commande de direction locale
+
+        self.declare_parameter(
+            'direction_topic',
+            '/robot/obstacle_direction',
+        )
         self.declare_parameter(
             'emergency_stop_topic', '/safety/emergency_stop'
         ) # arrêt d'urgence

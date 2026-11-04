@@ -72,6 +72,10 @@ class OpticalFlowEmergencyStop(Node):
             qos_profile_sensor_data,
         )
         self.timeout_timer = self.create_timer(0.1, self.check_image_timeout)
+        self.heartbeat_timer = self.create_timer(
+            0.1,
+            self.publish_heartbeat,
+        )
 
         self.publish_stop(True, 'en attente de deux images caméra valides')
         self.get_logger().info(
@@ -160,14 +164,29 @@ class OpticalFlowEmergencyStop(Node):
             self.previous_image_time = None
             self.publish_stop(True, 'flux caméra absent ou expiré')
 
-    def publish_stop(self, active: bool, reason: str) -> None:
-        if self.stop_active == active:
+    def publish_heartbeat(self) -> None:
+        self.publish_stop(
+            self.stop_active is not False,
+            'heartbeat',
+            force=True,
+        )
+
+    def publish_stop(
+        self,
+        active: bool,
+        reason: str,
+        force: bool = False,
+    ) -> None:
+        changed = self.stop_active != active
+        if not changed and not force:
             return
 
         message = Bool()
         message.data = active
         self.stop_publisher.publish(message)
         self.stop_active = active
+        if not changed:
+            return
         if active:
             self.get_logger().warning(
                 f'ARRÊT D’URGENCE actif : {reason}'

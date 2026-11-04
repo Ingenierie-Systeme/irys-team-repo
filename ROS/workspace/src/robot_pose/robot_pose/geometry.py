@@ -6,6 +6,7 @@ import numpy as np
 
 
 EARTH_RADIUS_METERS = 6_371_000.0
+GRAVITY_METERS_PER_SECOND_SQUARED = 9.80665
 
 
 def quaternion_rotate(
@@ -42,3 +43,15 @@ def geodetic_to_enu(
     )
     up = altitude - origin_altitude
     return np.array([east, north, up], dtype=np.float64)
+
+
+def pressure_to_depth(
+    pressure_pa: float,
+    surface_pressure_pa: float,
+    fluid_density_kg_m3: float,
+) -> float:
+    """Convert absolute fluid pressure to non-negative depth in meters."""
+    pressure_difference = max(0.0, pressure_pa - surface_pressure_pa)
+    return pressure_difference / (
+        fluid_density_kg_m3 * GRAVITY_METERS_PER_SECOND_SQUARED
+    )

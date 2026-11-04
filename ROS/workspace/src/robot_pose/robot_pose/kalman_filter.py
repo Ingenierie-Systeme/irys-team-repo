@@ -114,3 +114,52 @@ class PositionVelocityFilter:
         )
         self.covariance = 0.5 * (self.covariance + self.covariance.T)
         return True
+
+    def update_vertical_position(
+        self,
+        position_z: float,
+        measurement_variance: float,
+        mahalanobis_threshold: float,
+    ) -> bool:
+        """Correct vertical position and velocity from a scalar measurement."""
+        if (
+            not self.initialized
+            or not np.isfinite(position_z)
+            or not np.isfinite(measurement_variance)
+            or measurement_variance <= 0.0
+            or not np.isfinite(mahalanobis_threshold)
+            or mahalanobis_threshold <= 0.0
+        ):
+            return False
+
+        observation = np.zeros(6, dtype=np.float64)
+        observation[2] = 1.0
+        innovation = position_z - float(observation @ self.state)
+        innovation_variance = float(
+            observation @ self.covariance @ observation
+            + measurement_variance
+        )
+        if not np.isfinite(innovation_variance) or innovation_variance <= 0.0:
+            return False
+
+        distance_squared = innovation**2 / innovation_variance
+        if (
+            not np.isfinite(distance_squared)
+            or distance_squared > mahalanobis_threshold
+        ):
+            return False
+
+        gain = self.covariance @ observation / innovation_variance
+        self.state += gain * innovation
+
+        residual_projection = (
+            np.eye(6, dtype=np.float64) - np.outer(gain, observation)
+        )
+        self.covariance = (
+            residual_projection
+            @ self.covariance
+            @ residual_projection.T
+            + np.outer(gain, gain) * measurement_variance
+        )
+        self.covariance = 0.5 * (self.covariance + self.covariance.T)
+        return True

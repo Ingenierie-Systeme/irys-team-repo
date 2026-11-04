@@ -1,3 +1,4 @@
+import math
 import time
 
 import rclpy
@@ -22,7 +23,18 @@ class ServoCommandPublisher(Node):
     def __init__(self) -> None:
         super().__init__('servo_command_publisher')
         self.declare_parameter('direction_topic', '/robot/direction')
+        self.declare_parameter('direction_timeout_seconds', 1.0)
         direction_topic = self.get_parameter('direction_topic').value
+        self.direction_timeout_seconds = float(
+            self.get_parameter('direction_timeout_seconds').value
+        )
+        if (
+            not math.isfinite(self.direction_timeout_seconds)
+            or self.direction_timeout_seconds <= 0.0
+        ):
+            raise ValueError(
+                'direction_timeout_seconds doit être supérieur à zéro.'
+            )
 
         direction_qos = QoSProfile(
             depth=1,
@@ -42,6 +54,7 @@ class ServoCommandPublisher(Node):
             direction_qos,
         )
         self.direction = (0.0, 0.0)
+        self.last_direction_time: float | None = None
         self.start_time = time.monotonic()
         self.timer = self.create_timer(
             1.0 / PUBLISH_RATE_HZ,
@@ -53,12 +66,30 @@ class ServoCommandPublisher(Node):
         )
 
     def on_direction(self, message: Vector3Stamped) -> None:
-        self.direction = (message.vector.x, message.vector.y)
+        direction = (message.vector.x, message.vector.y)
+        if not all(math.isfinite(value) for value in direction):
+            self.direction = (0.0, 0.0)
+            self.last_direction_time = time.monotonic()
+            self.get_logger().error(
+                'Direction invalide reçue ; consigne servo mise à zéro.'
+            )
+            return
+
+        self.direction = direction
+        self.last_direction_time = time.monotonic()
 
     def publish_commands(self) -> None:
-        elapsed = time.monotonic() - self.start_time
+        now = time.monotonic()
+        elapsed = now - self.start_time
+        direction = self.direction
+        if (
+            self.last_direction_time is None
+            or now - self.last_direction_time
+            > self.direction_timeout_seconds
+        ):
+            direction = (0.0, 0.0)
         fin_angle, mass_angle = convert_direction_to_servo_positions(
-            *self.direction,
+            *direction,
             elapsed,
         )
 

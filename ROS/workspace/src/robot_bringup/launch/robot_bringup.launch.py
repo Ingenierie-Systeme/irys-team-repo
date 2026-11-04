@@ -23,21 +23,6 @@ def generate_launch_description():
             description='Port d’écoute TCP de ROS-TCP-Endpoint.',
         ),
         DeclareLaunchArgument(
-            'start_imu_viewer',
-            default_value='true',
-            description='Démarrer le viewer du topic /imu/data.',
-        ),
-        DeclareLaunchArgument(
-            'start_gnss_viewer',
-            default_value='true',
-            description='Démarrer le viewer du topic /gnss/fix.',
-        ),
-        DeclareLaunchArgument(
-            'start_camera_viewer',
-            default_value='true',
-            description='Démarrer le viewer caméra sur /camera/image.',
-        ),
-        DeclareLaunchArgument(
             'start_obstacle_monitor',
             default_value='true',
             description='Démarrer le moniteur TTC par flux optique.',
@@ -48,9 +33,18 @@ def generate_launch_description():
             description='Démarrer le choix de direction par caméra.',
         ),
         DeclareLaunchArgument(
+            'start_robot_brain',
+            default_value='true',
+            description=(
+                'Démarrer la supervision et l’arbitrage des consignes.'
+            ),
+        ),
+        DeclareLaunchArgument(
             'start_servo_controller',
             default_value='true',
-            description='Démarrer la conversion de direction en commandes servo.',
+            description=(
+                'Démarrer la conversion de direction en commandes servo.'
+            ),
         ),
         DeclareLaunchArgument(
             'start_state_estimator',
@@ -68,27 +62,6 @@ def generate_launch_description():
             }],
         ),
         Node(
-            package='sensor_subscriber',
-            executable='imu_viewer',
-            name='imu_viewer',
-            output='screen',
-            condition=IfCondition(LaunchConfiguration('start_imu_viewer')),
-        ),
-        Node(
-            package='sensor_subscriber',
-            executable='gnss_viewer',
-            name='gnss_viewer',
-            output='screen',
-            condition=IfCondition(LaunchConfiguration('start_gnss_viewer')),
-        ),
-        Node(
-            package='sensor_subscriber',
-            executable='camera_viewer',
-            name='camera_viewer',
-            output='screen',
-            condition=IfCondition(LaunchConfiguration('start_camera_viewer')),
-        ),
-        Node(
             package='robot_brain',
             executable='optical_flow_emergency_stop',
             name='optical_flow_emergency_stop',
@@ -104,6 +77,15 @@ def generate_launch_description():
             output='screen',
             condition=IfCondition(
                 LaunchConfiguration('start_camera_avoidance')
+            ),
+        ),
+        Node(
+            package='robot_brain',
+            executable='robot_brain',
+            name='robot_brain',
+            output='screen',
+            condition=IfCondition(
+                LaunchConfiguration('start_robot_brain')
             ),
         ),
         Node(

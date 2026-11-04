@@ -6,7 +6,7 @@
     - IMU : `/imu/data`
     - Caméra : `/camera/image`
     - GNSS : `/gnss/fix`
-    - Baromètre : `/baro/data`
+    - Capteur de pression hydrostatique : `/pressure` (`sensor_msgs/msg/FluidPressure`, Pa absolus)
 - estimation de l'état au fil du temps (package `robot_pose`)
     - filtre de Kalman
     - recalibration au GPS en surface
@@ -14,8 +14,8 @@
 - estimation de la sécurité et navigation (package `robot_brain`)
     - estimation heuristique du temps avant collision dans trois secteurs caméra
     - choix d'une direction locale pour éviter un obstacle visible
-    - suivi de mur visuel
     - arrêt d'urgence si obstacle trop proche via flux optique (`robot_brain/optical_flow_emergency_stop.py`)
+    - arbitrage des entrées de perception et de l'état estimé avant commande
     - publication sur le topic `/robot/direction` (direction vers laquelle le robot doit se diriger, en prenant en compte sa manoeuvrabilité limité)
 - commandes des servo-moteurs (package `robot_control`)
     - convertit la direction en consignes pour les servo-moteurs
@@ -64,18 +64,28 @@ IMU, GNSS et caméra peuvent être désactivés séparément avec
 `start_camera_viewer:=false`. Le moniteur de sécurité peut être désactivé avec
 `start_obstacle_monitor:=false`. L'estimateur d'état peut être désactivé avec
 `start_state_estimator:=false`. L'évitement caméra peut être désactivé avec
-`start_camera_avoidance:=false`. Le contrôleur servo peut être désactivé avec
+`start_camera_avoidance:=false`. L'arbitrage des consignes peut être désactivé
+avec `start_robot_brain:=false`. Le contrôleur servo peut être désactivé avec
 `start_servo_controller:=false`. L'adresse et le port peuvent être changés avec
 `tcp_ip:=0.0.0.0` et `tcp_port:=10000`.
 
 ## Estimation de l'état du robot
 
-Le nœud `robot_pose/state_estimator` fusionne l'IMU `/imu/data` et les fixes
-GNSS `/gnss/fix`. Il propage position et vitesse en coordonnées ENU à partir
-de l'accélération IMU, puis corrige la position par filtre de Kalman lorsqu'un
-fix GNSS valide est disponible. La publication `nav_msgs/msg/Odometry` sur
-`/robot/pose` utilise `odom` comme repère monde et `base_link` comme repère
-robot. Les coordonnées GNSS sont relatives à l'origine par défaut
+Le nœud `robot_pose/state_estimator` fusionne l'IMU `/imu/data`, les fixes GNSS
+`/gnss/fix` et le capteur de pression `/pressure`. Il propage position et
+vitesse en coordonnées ENU à partir de l'accélération IMU, corrige la position
+par filtre de Kalman avec le GNSS et corrige spécifiquement l'altitude `z` avec
+la profondeur déduite de la pression hydrostatique. La première mesure de
+pression valide sert de référence de surface : le robot doit donc être à la
+surface au démarrage du nœud. La pression étant absolue, la profondeur est
+calculée par `(pression - référence_surface) / (densité_eau × g)` et devient
+un `z` ENU négatif. La densité d'eau vaut 1000 kg/m³ par défaut et se règle
+avec `water_density_kg_m3`. Si la variance ROS est nulle ou absente, le filtre
+utilise `default_pressure_depth_variance` (1 m² par défaut) ; sinon il convertit
+la variance de pression en variance de profondeur.
+
+La publication `nav_msgs/msg/Odometry` sur `/robot/pose` utilise `odom` comme
+repère monde et `base_link` comme repère robot. Les coordonnées GNSS sont relatives à l'origine par défaut
 (48.39°, -4.48°, 0 m), à configurer pour correspondre à l'origine de la scène
 Unity :
 
@@ -85,6 +95,12 @@ ros2 run robot_pose state_estimator --ros-args \
   -p origin_longitude:=-4.48 \
   -p origin_altitude:=0.0
 ```
+
+La pression peut être vérifiée directement avec
+`ros2 topic echo /pressure`; l'altitude estimée se lit dans
+`/robot/pose.pose.pose.position.z` (négative sous la surface). Il est
+recommandé de définir `origin_altitude` à l'altitude de la surface si le GNSS
+est utilisé pour initialiser l'estimateur.
 
 Le filtre s'initialise au premier fix GNSS valide. Il continue ensuite par
 propagation inertielle quand le GNSS n'émet plus, mais son incertitude augmente
@@ -120,8 +136,8 @@ dernier état. Il revient à `false` quand des images valides indiquent un TTC
 supérieur au seuil. Cette estimation est une heuristique qui suppose un point
 de fuite au centre et une expansion due à l'approche d'un obstacle fixe ; elle
 ne fournit pas une distance métrique et ne remplace pas un dispositif de
-sécurité certifié. Aucun contrôleur moteur n'étant actuellement connecté à ce
-topic, le nœud publie l'état d'arrêt mais n'immobilise pas seul le robot.
+sécurité certifié. Le nœud `robot_brain` consomme cet état et impose une
+direction nulle sur `/robot/direction` pendant l'arrêt.
 
 ## Estimation des obstacles et choix de direction
 
@@ -132,16 +148,25 @@ dangereux, puis choisit une diagonale vers le côté dont le TTC paraît le plus
 élevé. Si aucun côté ne semble sûr, si la caméra expire ou si
 `/safety/emergency_stop` vaut `true`, il publie un vecteur nul.
 
-La consigne est un `geometry_msgs/msg/Vector3Stamped` sur `/robot/direction`,
-exprimé dans `base_link` avec `x` vers l'avant, `y` vers la gauche et `z` vers
-le haut. Les choix sont avant `(1, 0, 0)`, diagonale `(0.5, ±0.866, 0)` ou arrêt
-`(0, 0, 0)`. Le seuil TTC est de 2 secondes par défaut et peut être réglé avec
-`minimum_time_to_contact`. Le nœud s'utilise seul ainsi :
+La proposition de direction est un `geometry_msgs/msg/Vector3Stamped` sur
+`/robot/obstacle_direction`, exprimée dans `base_link` avec `x` vers l'avant,
+`y` vers la gauche et `z` vers le haut. Les choix sont avant `(1, 0, 0)`,
+diagonale `(0.5, ±0.866, 0)` ou arrêt `(0, 0, 0)`. Le seuil TTC est de
+2 secondes par défaut et peut être réglé avec `minimum_time_to_contact`.
+
+Le nœud `robot_brain/robot_brain` arbitre cette proposition avec la pose
+`/robot/pose` et l'état `/safety/emergency_stop`. Il relaie la direction vers
+`/robot/direction` seulement si la pose et la proposition sont valides et
+reçues depuis moins de 0,5 seconde, et si un état d'arrêt d'urgence récent
+indique que l'arrêt est inactif. Sinon, il publie un vecteur nul. Le délai
+maximal d'ancienneté des entrées se règle avec `input_timeout_seconds`.
+
+Le nœud d'évitement caméra peut aussi s'utiliser seul en publiant sa proposition :
 
 ```bash
 ros2 run robot_brain camera_obstacle_avoidance --ros-args \
   -p image_topic:=/camera/image \
-  -p direction_topic:=/robot/direction \
+  -p direction_topic:=/robot/obstacle_direction \
   -p minimum_time_to_contact:=2.0
 ```
 
@@ -157,12 +182,18 @@ le `PointCloud2` simulé sur `/lidar/points`) et l'installation d'un capteur
 Le nœud `robot_control/servo_command_publisher` lit le
 `geometry_msgs/msg/Vector3Stamped` de `/robot/direction` et publie des
 `std_msgs/msg/Float64` sur `/servo/nageoire_cmd` et `/servo/masse_cmd`, à
-50 Hz. L'angle de la nageoire suit le cap du vecteur `(x, y)` avec une
+50 Hz. En l'absence de nouvelle direction pendant 0,5 seconde, il applique une
+consigne nulle ; ce délai se règle avec `direction_timeout_seconds`. L'angle
+de la nageoire suit le cap du vecteur `(x, y)` avec une
 oscillation sinusoïdale d'amplitude maximale 40° et de période 5 secondes.
 L'amplitude suit la norme du vecteur (les vecteurs directionnels actuels ont
 une norme de 1 et l'arrêt une norme de 0) ; la consigne est limitée à ±90°.
 L'angle de la masse est proportionnel à `x`, borné à ±50° ; une direction
-nulle recentre les deux servos.
+nulle recentre les deux servos. Dans Unity, `masse_mobile_AB` convertit la
+commande en déplacement sur l'axe Z de l'articulation prismatique : ±50°
+correspond à ±`courseMax` (0,1 m par défaut). Le déplacement est limité par
+`vitesse` et la masse revient au centre si aucune commande n'arrive pendant
+`delaiCommandeSecondes` (1 s par défaut).
 
 ```bash
 ros2 run robot_control servo_command_publisher

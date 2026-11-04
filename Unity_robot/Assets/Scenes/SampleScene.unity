@@ -924,8 +924,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::aileron
   amortissementLineaireX: 60
-  amortissementLineaireY: 0
-  amortissementLineaireZ: 0
+  amortissementLineaireY: 2
+  amortissementLineaireZ: 2
   amortissementAngulaireX: 0
   amortissementAngulaireY: 80
   amortissementAngulaireZ: 10
@@ -2758,6 +2758,14 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 5.07
       objectReference: {fileID: 0}
+    - target: {fileID: -1853094968961178454, guid: ef8a9b3acd129eda484f5caa3e9cd5bc, type: 3}
+      propertyPath: m_Curvature.x
+      value: 1.8079755
+      objectReference: {fileID: 0}
+    - target: {fileID: -1853094968961178454, guid: ef8a9b3acd129eda484f5caa3e9cd5bc, type: 3}
+      propertyPath: m_Curvature.y
+      value: 10.807972
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ef8a9b3acd129eda484f5caa3e9cd5bc, type: 3}
       propertyPath: m_Name
       value: Piscine_ENSTA_ROB_with_textures
@@ -2987,6 +2995,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45793ee66e24ca4caa9addbb4332b559, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::servo_AB
+  topicName: /servo/nageoire_cmd
   vitesse: 150
   angleMax: 70
   toucheDroite: 275
@@ -5574,7 +5583,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::modif_damping
   amortissementLineaireX: 30
   amortissementLineaireY: 30
-  amortissementLineaireZ: 1
+  amortissementLineaireZ: 2
   amortissementAngulaireX: 10
   amortissementAngulaireY: 10
   amortissementAngulaireZ: 0
@@ -6091,8 +6100,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::aileron
   amortissementLineaireX: 60
-  amortissementLineaireY: 0
-  amortissementLineaireZ: 0
+  amortissementLineaireY: 2
+  amortissementLineaireZ: 2
   amortissementAngulaireX: 0
   amortissementAngulaireY: 80
   amortissementAngulaireZ: 10

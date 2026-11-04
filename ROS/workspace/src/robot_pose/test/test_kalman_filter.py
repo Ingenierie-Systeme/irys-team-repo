@@ -1,6 +1,10 @@
 import numpy as np
 
-from robot_pose.geometry import geodetic_to_enu, quaternion_rotate
+from robot_pose.geometry import (
+    geodetic_to_enu,
+    pressure_to_depth,
+    quaternion_rotate,
+)
 from robot_pose.kalman_filter import PositionVelocityFilter
 
 
@@ -18,6 +22,13 @@ def test_quaternion_rotation_uses_ros_xyzw_order():
         quaternion_rotate(quaternion, np.array([1.0, 0.0, 0.0])),
         [0.0, 1.0, 0.0],
     )
+
+
+def test_pressure_is_converted_to_non_negative_depth():
+    pressure_pa = 101325.0 + 1000.0 * 9.80665 * 2.0
+
+    assert np.isclose(pressure_to_depth(pressure_pa, 101325.0, 1000.0), 2.0)
+    assert pressure_to_depth(101000.0, 101325.0, 1000.0) == 0.0
 
 
 def test_prediction_integrates_acceleration():
@@ -62,6 +73,36 @@ def test_rejects_gnss_outlier():
     accepted = estimator.update_position(
         np.array([100.0, 0.0, 0.0]),
         np.eye(3) * 0.01,
+        mahalanobis_threshold=16.27,
+    )
+
+    assert not accepted
+    assert np.allclose(estimator.state[:3], 0.0)
+
+
+def test_pressure_update_corrects_only_vertical_position():
+    estimator = PositionVelocityFilter(initial_velocity_variance=1.0)
+    estimator.initialize(np.zeros(3), np.eye(3))
+
+    accepted = estimator.update_vertical_position(
+        position_z=-2.0,
+        measurement_variance=0.25,
+        mahalanobis_threshold=16.27,
+    )
+
+    assert accepted
+    assert np.allclose(estimator.state[:2], 0.0)
+    assert estimator.state[2] < 0.0
+    assert estimator.covariance[2, 2] < 1.0
+
+
+def test_rejects_pressure_outlier():
+    estimator = PositionVelocityFilter(initial_velocity_variance=1.0)
+    estimator.initialize(np.zeros(3), np.eye(3) * 0.1)
+
+    accepted = estimator.update_vertical_position(
+        position_z=-100.0,
+        measurement_variance=0.01,
         mahalanobis_threshold=16.27,
     )
 
