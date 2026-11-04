@@ -7,7 +7,7 @@ using UnityEngine;
 public class servo_AB : MonoBehaviour
 {
     [Header("ROS")]
-    [SerializeField] private string topicName = "/servo/nageoire_cmd";
+    [SerializeField] private string topicName = "/output/servos";
 
     [Header("Rotation")]
     [Tooltip("Vitesse de la consigne (°/s)")]
@@ -57,7 +57,7 @@ public class servo_AB : MonoBehaviour
         ConfigurerDrive();
 
         ros = ROSConnection.GetOrCreateInstance();
-        ros.Subscribe<Float64Msg>(topicName, OnAngleMessage);
+        ros.Subscribe<Float32MultiArrayMsg>(topicName, OnServoCommands);
     }
 
     private void ConfigurerDrive()
@@ -96,9 +96,18 @@ public class servo_AB : MonoBehaviour
         SetAngleCommand(angleRadians * Mathf.Rad2Deg);
     }
 
-    private void OnAngleMessage(Float64Msg message)
+    private void OnServoCommands(Float32MultiArrayMsg message)
     {
-        SetAngleCommand((float)message.data);
+        if (message.data == null || message.data.Length < 1)
+        {
+            Debug.LogWarning(
+                "La commande /output/servos doit contenir l'angle de nageoire à l'index 0.",
+                this
+            );
+            return;
+        }
+
+        SetAngleCommand(message.data[0]);
     }
 
     void FixedUpdate()

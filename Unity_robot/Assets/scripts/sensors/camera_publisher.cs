@@ -14,7 +14,7 @@ public class CameraRosPublisher : MonoBehaviour
 {
     [Header("Topic ROS")]
     [Tooltip("Nom du topic :")]
-    public string topicName = "/camera/image";
+    public string topicName = "/input/camera";
     [Tooltip("Frame ID pour l'entête ROS (ex: camera_link)")]
     public string frameId = "camera_link";
 

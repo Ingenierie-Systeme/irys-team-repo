@@ -29,7 +29,7 @@ class OpticalFlowEmergencyStop(Node):
 
     def __init__(self) -> None:
         super().__init__('optical_flow_emergency_stop')
-        self.declare_parameter('image_topic', '/camera/image')
+        self.declare_parameter('image_topic', '/input/camera')
         self.declare_parameter('stop_topic', '/safety/emergency_stop')
         self.declare_parameter('ttc_threshold_seconds', 2.0)
         self.declare_parameter('image_timeout_seconds', 0.5)

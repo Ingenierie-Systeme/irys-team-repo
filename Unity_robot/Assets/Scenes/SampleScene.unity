@@ -321,7 +321,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a4b7a1ad01630bfabc6fc75c1e382a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::masse_mobile_AB
-  topicName: /servo/masse_cmd
+  topicName: /output/servos
   commandeMaxDegrees: 50
   delaiCommandeSecondes: 1
   vitesse: 0.1
@@ -2996,7 +2996,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45793ee66e24ca4caa9addbb4332b559, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::servo_AB
-  topicName: /servo/nageoire_cmd
+  topicName: /output/servos
   vitesse: 150
   angleMax: 70
   toucheDroite: 275
@@ -3045,7 +3045,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e509c36521b85d43ab78a0320ed3a2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  topicName: /gnss/fix
+  topicName: /input/gnss
   frameId: gnss_link
   originLat: 48.39
   originLon: -4.48
@@ -3878,7 +3878,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45efaf57f154c534389e1ec63c16f0c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  topicName: /camera/image
+  topicName: /input/camera
   frameId: camera_link
   frequence: 30
   width: 460
@@ -4268,7 +4268,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cea80cb3d8be3c745aeff49bee366d7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  topicName: /imu/data
+  topicName: /input/imu
   frameId: imu_link
   publishPeriod: 0.02
   articulationBody: {fileID: 0}
@@ -4617,7 +4617,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e27b48fb9c1405dbe3fff70d08e5741, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::pressure
-  topicName: /pressure
+  topicName: /input/pressure
   frameId: pressure_link
   publishPeriod: 0.1
   waterLevel: 0

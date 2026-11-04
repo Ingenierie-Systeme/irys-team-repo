@@ -9,7 +9,7 @@ using UnityEngine;
 public class masse_mobile_AB : MonoBehaviour
 {
     [Header("ROS")]
-    [SerializeField] private string topicName = "/servo/masse_cmd";
+    [SerializeField] private string topicName = "/output/servos";
 
     [Tooltip("Valeur absolue maximale de la commande ROS, en degrés.")]
     [SerializeField] private float commandeMaxDegrees = 50f;
@@ -68,7 +68,7 @@ public class masse_mobile_AB : MonoBehaviour
         ConfigurerDrive();
 
         ROSConnection ros = ROSConnection.GetOrCreateInstance();
-        ros.Subscribe<Float64Msg>(topicName, OnPositionMessage);
+        ros.Subscribe<Float32MultiArrayMsg>(topicName, OnServoCommands);
         Debug.Log($"La masse mobile écoute le topic ROS {topicName}.", this);
     }
 
@@ -88,9 +88,18 @@ public class masse_mobile_AB : MonoBehaviour
         articulationBody.zDrive = drive;
     }
 
-    private void OnPositionMessage(Float64Msg message)
+    private void OnServoCommands(Float32MultiArrayMsg message)
     {
-        float commande = (float)message.data;
+        if (message.data == null || message.data.Length < 2)
+        {
+            Debug.LogWarning(
+                "La commande /output/servos doit contenir l'angle de masse mobile à l'index 1.",
+                this
+            );
+            return;
+        }
+
+        float commande = message.data[1];
         if (float.IsNaN(commande) || float.IsInfinity(commande))
         {
             Debug.LogWarning("La commande de masse doit être finie.", this);

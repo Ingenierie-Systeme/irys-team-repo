@@ -36,9 +36,9 @@ class RobotStateEstimator(Node):
 
     def __init__(self) -> None:
         super().__init__('robot_state_estimator')
-        self.declare_parameter('imu_topic', '/imu/data')
-        self.declare_parameter('gnss_topic', '/gnss/fix')
-        self.declare_parameter('pressure_topic', '/pressure')
+        self.declare_parameter('imu_topic', '/input/imu')
+        self.declare_parameter('gnss_topic', '/input/gnss')
+        self.declare_parameter('pressure_topic', '/input/pressure')
         self.declare_parameter('pose_topic', '/robot/pose')
         self.declare_parameter('origin_latitude', 48.39)
         self.declare_parameter('origin_longitude', -4.48)

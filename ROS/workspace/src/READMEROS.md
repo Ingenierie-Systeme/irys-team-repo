@@ -2,11 +2,12 @@
 
 ## Architecture du contrôle du robot
 
-- reception des informations des capteurs (codes exemples dans `sensor_subscriber`)
-    - IMU : `/imu/data`
-    - Caméra : `/camera/image`
-    - GNSS : `/gnss/fix`
-    - Capteur de pression hydrostatique : `/pressure` (`sensor_msgs/msg/FluidPressure`, Pa absolus)
+- réception des informations des capteurs (codes exemples dans `sensor_subscriber`)
+    - IMU : `/input/imu`
+    - capteur magnétique : `/input/mag`
+    - Caméra : `/input/camera`
+    - GNSS : `/input/gnss`
+    - Capteur de pression hydrostatique : `/input/pressure` (`sensor_msgs/msg/FluidPressure`, Pa absolus)
 - estimation de l'état au fil du temps (package `robot_pose`)
     - filtre de Kalman
     - recalibration au GPS en surface
@@ -17,10 +18,10 @@
     - arrêt d'urgence si obstacle trop proche via flux optique (`robot_brain/optical_flow_emergency_stop.py`)
     - arbitrage des entrées de perception et de l'état estimé avant commande
     - publication sur le topic `/robot/direction` (direction vers laquelle le robot doit se diriger, en prenant en compte sa manoeuvrabilité limité)
-- commandes des servo-moteurs (package `robot_control`)
+- commandes des servo-moteurs (package `robot_control`) `/output/servos` (Float32MultiArray)
     - convertit la direction en consignes pour les servo-moteurs
-    - nageoire pour le déplacement : `/servo/nageoire_cmd`
-    - masse mobile pour l'inclinaison : `/servo/masse_cmd`
+    - nageoire pour le déplacement : `/output/servos`[0]
+    - masse mobile pour l'inclinaison : `/output/servos`[1]
 
 ## Comportement du robot
 
@@ -69,8 +70,8 @@ avec `start_robot_brain:=false`. Le contrôleur servo peut être désactivé ave
 
 ## Estimation de l'état du robot
 
-Le nœud `robot_pose/state_estimator` fusionne l'IMU `/imu/data`, les fixes GNSS
-`/gnss/fix` et le capteur de pression `/pressure`. Il propage position et
+Le nœud `robot_pose/state_estimator` fusionne l'IMU `/input/imu`, les fixes GNSS
+`/input/gnss` et le capteur de pression `/input/pressure`. Il propage position et
 vitesse en coordonnées ENU à partir de l'accélération IMU, corrige la position
 par filtre de Kalman avec le GNSS et corrige spécifiquement l'altitude `z` avec
 la profondeur déduite de la pression hydrostatique. La première mesure de
@@ -95,7 +96,7 @@ ros2 run robot_pose state_estimator --ros-args \
 ```
 
 La pression peut être vérifiée directement avec
-`ros2 topic echo /pressure`; l'altitude estimée se lit dans
+`ros2 topic echo /input/pressure`; l'altitude estimée se lit dans
 `/robot/pose.pose.pose.position.z` (négative sous la surface). Il est
 recommandé de définir `origin_altitude` à l'altitude de la surface si le GNSS
 est utilisé pour initialiser l'estimateur.
@@ -115,14 +116,14 @@ conformément à la configuration Unity actuelle.
 
 ## Arrêt d'urgence par flux optique
 
-Le nœud `robot_brain/optical_flow_emergency_stop` lit `/camera/image`, estime
+Le nœud `robot_brain/optical_flow_emergency_stop` lit `/input/camera`, estime
 le temps avant collision à partir de l'expansion radiale du flux optique et
 publie un `std_msgs/msg/Bool` sur `/safety/emergency_stop`. `true` signifie
 arrêt actif. Le seuil TTC est configurable (2 secondes par défaut) :
 
 ```bash
 ros2 run robot_brain optical_flow_emergency_stop --ros-args \
-  -p image_topic:=/camera/image \
+  -p image_topic:=/input/camera \
   -p stop_topic:=/safety/emergency_stop \
   -p ttc_threshold_seconds:=2.0
 ```
@@ -140,7 +141,7 @@ direction nulle sur `/robot/direction` pendant l'arrêt.
 ## Estimation des obstacles et choix de direction
 
 Le nœud `robot_brain/camera_obstacle_avoidance` analyse le flux de
-`/camera/image` et estime un TTC heuristique dans les secteurs gauche, centre
+`/input/camera` et estime un TTC heuristique dans les secteurs gauche, centre
 et droit. Il garde le cap avant tant que le secteur central ne paraît pas
 dangereux, puis choisit une diagonale vers le côté dont le TTC paraît le plus
 élevé. Si aucun côté ne semble sûr, si la caméra expire ou si
@@ -163,7 +164,7 @@ Le nœud d'évitement caméra peut aussi s'utiliser seul en publiant sa proposit
 
 ```bash
 ros2 run robot_brain camera_obstacle_avoidance --ros-args \
-  -p image_topic:=/camera/image \
+  -p image_topic:=/input/camera \
   -p direction_topic:=/robot/obstacle_direction \
   -p minimum_time_to_contact:=2.0
 ```
@@ -178,10 +179,12 @@ le `PointCloud2` simulé sur `/lidar/points`) et l'installation d'un capteur
 ## Commande du servo
 
 Le nœud `robot_control/servo_command_publisher` lit le
-`geometry_msgs/msg/Vector3Stamped` de `/robot/direction` et publie des
-`std_msgs/msg/Float64` sur `/servo/nageoire_cmd` et `/servo/masse_cmd`, à
-50 Hz. En l'absence de nouvelle direction pendant 0,5 seconde, il applique une
-consigne nulle ; ce délai se règle avec `direction_timeout_seconds`. L'angle
+`geometry_msgs/msg/Vector3Stamped` de `/robot/direction` et publie un
+`std_msgs/msg/Float32MultiArray` sur `/output/servos`, à 50 Hz. L'élément `[0]`
+contient la consigne de nageoire en degrés et l'élément `[1]` la consigne de
+masse mobile en degrés. En l'absence de nouvelle direction pendant 0,5 seconde,
+il applique une consigne nulle ; ce délai se règle avec
+`direction_timeout_seconds`. L'angle
 de la nageoire suit le cap du vecteur `(x, y)` avec une
 oscillation sinusoïdale d'amplitude maximale 40° et de période 5 secondes.
 L'amplitude suit la norme du vecteur (les vecteurs directionnels actuels ont
@@ -196,4 +199,3 @@ correspond à ±`courseMax` (0,1 m par défaut). Le déplacement est limité par
 ```bash
 ros2 run robot_control servo_command_publisher
 ```
-

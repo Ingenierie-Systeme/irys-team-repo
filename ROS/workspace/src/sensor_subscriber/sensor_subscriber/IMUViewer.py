@@ -8,14 +8,14 @@ from sensor_msgs.msg import Imu
 
 class IMUViewer(Node):
     """Nœud ROS 2 qui lit sensor_msgs/msg/Imu et affiche les mesures.
-    ros2 run sensor_subscriber imu_viewer --ros-args -p topic:=/imu/data
+    ros2 run sensor_subscriber imu_viewer --ros-args -p topic:=/input/imu
     """
 
     def __init__(self):
         super().__init__('imu_viewer')
         # Topic paramétrable :
-        #   ros2 run sensor_subscriber imu_viewer --ros-args -p topic:=/imu/data
-        self.declare_parameter('topic', '/imu/data')
+        #   ros2 run sensor_subscriber imu_viewer --ros-args -p topic:=/input/imu
+        self.declare_parameter('topic', '/input/imu')
         topic = self.get_parameter('topic').get_parameter_value().string_value
 
         # QoS "sensor data" : best effort, adapté aux capteurs temps réel.

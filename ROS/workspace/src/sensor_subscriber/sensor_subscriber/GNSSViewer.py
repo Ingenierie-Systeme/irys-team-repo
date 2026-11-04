@@ -7,13 +7,13 @@ from sensor_msgs.msg import NavSatFix, NavSatStatus
 
 
 class GNSSViewer(Node):
-    """Nœud ROS 2 qui lit /gnss/fix et affiche la position."""
+    """Nœud ROS 2 qui lit /input/gnss et affiche la position."""
 
     def __init__(self):
         super().__init__('gnss_viewer')
         # Topic paramétrable :
-        #   ros2 run sensor_subscriber gnss_viewer --ros-args -p topic:=/gnss/fix
-        self.declare_parameter('topic', '/gnss/fix')
+        #   ros2 run sensor_subscriber gnss_viewer --ros-args -p topic:=/input/gnss
+        self.declare_parameter('topic', '/input/gnss')
         topic = self.get_parameter('topic').get_parameter_value().string_value
 
         self.subscription = self.create_subscription(

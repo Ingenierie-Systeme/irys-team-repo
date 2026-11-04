@@ -26,17 +26,17 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'start_imu_viewer',
             default_value='true',
-            description='Démarrer le viewer du topic /imu/data.',
+            description='Démarrer le viewer du topic /input/imu.',
         ),
         DeclareLaunchArgument(
             'start_gnss_viewer',
             default_value='true',
-            description='Démarrer le viewer du topic /gnss/fix.',
+            description='Démarrer le viewer du topic /input/gnss.',
         ),
         DeclareLaunchArgument(
             'start_camera_viewer',
             default_value='true',
-            description='Démarrer le viewer caméra sur /camera/image.',
+            description='Démarrer le viewer caméra sur /input/camera.',
         ),
         
         Node(

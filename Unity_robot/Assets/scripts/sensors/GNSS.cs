@@ -7,7 +7,7 @@ using RosMessageTypes.BuiltinInterfaces;
 
 
 /// Simule un GNSS : publie la position (latitude/longitude/altitude) sur
-/// sensor_msgs/msg/NavSatFix (topic /gnss/fix) via ROS-TCP-Connector.
+/// sensor_msgs/msg/NavSatFix (topic /input/gnss) via ROS-TCP-Connector.
 ///
 /// La scène est supposée représenter une zone locale autour d'un point
 /// géographique de référence (originLat/originLon) : la position Unity
@@ -17,7 +17,7 @@ using RosMessageTypes.BuiltinInterfaces;
 public class GNSS : MonoBehaviour
 {
     [Header("Topic ROS")]
-    public string topicName = "/gnss/fix";
+    public string topicName = "/input/gnss";
     public string frameId = "gnss_link";
 
     [Header("Origine géographique de la scène")]

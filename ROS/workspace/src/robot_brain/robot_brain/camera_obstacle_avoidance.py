@@ -32,7 +32,7 @@ class CameraObstacleAvoidance(Node):
 
     def __init__(self) -> None:
         super().__init__('camera_obstacle_avoidance')
-        self.declare_parameter('image_topic', '/camera/image')  # réception de la caméra
+        self.declare_parameter('image_topic', '/input/camera')
 
         self.declare_parameter(
             'direction_topic',

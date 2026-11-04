@@ -9,7 +9,7 @@ from rclpy.qos import (
     QoSProfile,
     ReliabilityPolicy,
 )
-from std_msgs.msg import Float64
+from std_msgs.msg import Float32MultiArray
 
 from robot_control.servo_command import convert_direction_to_servo_positions
 
@@ -41,11 +41,8 @@ class ServoCommandPublisher(Node):
             reliability=ReliabilityPolicy.RELIABLE,
             durability=DurabilityPolicy.TRANSIENT_LOCAL,
         )
-        self.fin_publisher = self.create_publisher(
-            Float64, '/servo/nageoire_cmd', 10
-        )
-        self.mass_publisher = self.create_publisher(
-            Float64, '/servo/masse_cmd', 10
+        self.servo_publisher = self.create_publisher(
+            Float32MultiArray, '/output/servos', 10
         )
         self.direction_subscription = self.create_subscription(
             Vector3Stamped,
@@ -61,8 +58,8 @@ class ServoCommandPublisher(Node):
             self.publish_commands,
         )
         self.get_logger().info(
-            f'Conversion de {direction_topic} vers /servo/nageoire_cmd et '
-            '/servo/masse_cmd.'
+            f'Conversion de {direction_topic} vers /output/servos '
+            '(nageoire, masse mobile).'
         )
 
     def on_direction(self, message: Vector3Stamped) -> None:
@@ -93,13 +90,9 @@ class ServoCommandPublisher(Node):
             elapsed,
         )
 
-        fin_message = Float64()
-        fin_message.data = fin_angle
-        self.fin_publisher.publish(fin_message)
-
-        mass_message = Float64()
-        mass_message.data = mass_angle
-        self.mass_publisher.publish(mass_message)
+        message = Float32MultiArray()
+        message.data = [float(fin_angle), float(mass_angle)]
+        self.servo_publisher.publish(message)
 
 
 def main(args: list[str] | None = None) -> None:

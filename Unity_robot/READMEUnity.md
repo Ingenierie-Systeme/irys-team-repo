@@ -32,13 +32,15 @@ La hiérarchie mécanique est construite avec des composants Unity
 
 - **Queue — articulation rotative (`RevoluteJoint`)** : le servo fait osciller
   la nageoire caudale. `servo_AB` reçoit des commandes `std_msgs/Float64` sur
-  `/servo/nageoire_cmd`, en degrés, limitées par défaut à `±50°`. Les flèches
-  gauche et droite permettent aussi de modifier la consigne au clavier.
+  `/output/servos` (`std_msgs/Float32MultiArray`), où l'index `0` contient
+  l'angle en degrés, limité par `angleMax` (`±50°` par défaut dans le script,
+  `±70°` dans `SampleScene`). Les flèches gauche et droite permettent aussi de
+  modifier la consigne au clavier.
 - **Masse mobile — articulation prismatique (`PrismaticJoint`)** : la masse se
   déplace sur l'axe local Z, avec une course par défaut de `±0,1 m`.
-  `masse_mobile_AB` convertit les commandes en degrés reçues sur
-  `/servo/masse_cmd` en position dans cette course. En l'absence de commande
-  pendant une seconde, la consigne revient progressivement au centre.
+  `masse_mobile_AB` convertit la valeur à l'index `1` de `/output/servos`
+  (degrés) en position dans cette course. En l'absence de commande pendant une
+  seconde, la consigne revient progressivement au centre.
 - **Liaisons fixes (`FixedJoint`)** : elles maintiennent ensemble les parties
   rigides, notamment les éléments de transmission du servo et les ailerons.
 
@@ -77,10 +79,13 @@ Les scripts de capteurs disponibles publient notamment :
 
 | Capteur | Topic par défaut | Type ROS |
 | --- | --- | --- |
-| IMU | `/imu/data` | `sensor_msgs/Imu` |
-| Pression | `/pressure` | `sensor_msgs/FluidPressure` |
-| GNSS | `/gnss/fix` | `sensor_msgs/NavSatFix` |
-| Caméra | `/camera/image` | `sensor_msgs/Image` |
+| IMU | `/input/imu` | `sensor_msgs/Imu` |
+| Pression | `/input/pressure` | `sensor_msgs/FluidPressure` |
+| GNSS | `/input/gnss` | `sensor_msgs/NavSatFix` |
+| Caméra | `/input/camera` | `sensor_msgs/Image` |
+
+Le magnétomètre `/input/mag` est prévu dans l'architecture ROS, mais la scène
+Unity actuelle ne comporte pas de simulateur qui publie ce capteur.
 
 Ces Topics ont été choisi arbitrairement durant le développement de la simulation, mais il peuvent être modifiés pour s'accorder avec le robot réel.
 

@@ -1,6 +1,6 @@
-'''Noeud lisant le topic camera/image et affiche l'image:
+'''Noeud lisant le topic input/camera et affiche l'image:
 
-ros2 run sensor_subscriber camera_viewer --ros-args -p topic:=/camera/image
+ros2 run sensor_subscriber camera_viewer --ros-args -p topic:=/input/camera
 '''
 
 import rclpy
@@ -12,12 +12,12 @@ import cv2
 
 
 class CameraViewer(Node):
-    """Nœud ROS 2 qui lit /camera/image et affiche l'image en direct."""
+    """Nœud ROS 2 qui lit /input/camera et affiche l'image en direct."""
 
     def __init__(self):
         super().__init__('camera_viewer')
 
-        self.declare_parameter('topic', '/camera/image')
+        self.declare_parameter('topic', '/input/camera')
         topic = self.get_parameter('topic').value
 
         self.bridge = CvBridge()
