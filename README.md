@@ -35,8 +35,20 @@ que l’enregistrement d’images et de données expérimentales.
 
 ## Les pièces de CAO
 
+### Bras de transmission du servomoteur nageoire
 
+![Bras_transm](images/bras_transmission1.png)
+![Bras_transm2](images/bras_transmission2.png)
 
+### Platine de fixation de la nageoire
+
+![Platine_fixation](images/platine_fixation1.png)
+![Platine_fixation2](images/platine_fixation2.png)
+
+### Support servomoteur nageoire
+
+![support_servo](images/support_petit_servomoteur1.png)
+![support_servo2](images/support_petit_servomoteur2.png)
 
 # Hardware
 
