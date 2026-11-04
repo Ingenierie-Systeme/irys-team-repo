@@ -1,0 +1,23 @@
+{
+    "name": "straight_stop_half_step",
+    "dt": 0.0012499999720603228,
+    "seconds": 22.0,
+    "forward": 1.2343705892562866,
+    "lateral": 0.03711459040641785,
+    "yaw": 1.677714467048645,
+    "finalSpeed": 0.049692995846271515,
+    "maxSpeed": 0.12110994756221771,
+    "maxJointDeg": 12.774946212768555,
+    "maxServoDeg": 26.06993865966797,
+    "maxTrackingDeg": 1.1628748178482056,
+    "maxTargetSpeed": 136.76068115234375,
+    "maxTargetAcceleration": 957.03125,
+    "lastRestSpeed": 0.061138853430747986,
+    "peakAngularSpeed": 1.0291348695755005,
+    "finalPosition": {
+        "x": 0.03711459040641785,
+        "y": -0.03364461287856102,
+        "z": 1.2343705892562866
+    },
+    "wallSeconds": 33.5894596
+}

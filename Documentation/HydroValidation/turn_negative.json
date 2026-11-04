@@ -1,0 +1,23 @@
+{
+    "name": "turn_negative",
+    "dt": 0.0024999999441206455,
+    "seconds": 16.0,
+    "forward": 0.7450915575027466,
+    "lateral": 0.17165054380893707,
+    "yaw": 32.800376892089844,
+    "finalSpeed": 0.10304154455661774,
+    "maxSpeed": 0.11012673377990723,
+    "maxJointDeg": 15.575604438781738,
+    "maxServoDeg": 43.349510192871094,
+    "maxTrackingDeg": 1.697981834411621,
+    "maxTargetSpeed": 136.83853149414063,
+    "maxTargetAcceleration": 806.1431274414063,
+    "lastRestSpeed": 0.0,
+    "peakAngularSpeed": 0.8908153176307678,
+    "finalPosition": {
+        "x": 0.17165054380893707,
+        "y": -0.029796052724123,
+        "z": 0.7450915575027466
+    },
+    "wallSeconds": 12.249357199999999
+}

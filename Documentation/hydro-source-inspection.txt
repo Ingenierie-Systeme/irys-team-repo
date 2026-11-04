@@ -1,0 +1,32 @@
+tube parent=structure p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (0.0000, 0.0000, -5.5220), Extents: (0.0549, 0.0550, 0.2000) mesh=tube
+rail_400 parent=structure p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (0.0000, 0.0000, -5.5176), Extents: (0.0490, 0.0075, 0.1745) mesh=rail_400
+dome parent=structure p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (0.0000, 0.0000, -5.2881), Extents: (0.0523, 0.0523, 0.0259) mesh=dome
+clamp parent=structure p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (0.0000, 0.0039, -5.7070), Extents: (0.0684, 0.0617, 0.0150) mesh=clamp
+cap_front parent=structure p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (0.0000, 0.0000, -5.3291), Extents: (0.0576, 0.0577, 0.0151) mesh=cap_front
+cap_rear parent=structure p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (0.0000, 0.0000, -5.7150), Extents: (0.0552, 0.0553, 0.0151) mesh=cap_rear
+camera_mount parent=structure p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (0.0000, 0.0000, -5.3312), Extents: (0.0207, 0.0489, 0.0145) mesh=camera_mount
+camera parent=camera_mount p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (0.0000, 0.0000, -5.3138), Extents: (0.0191, 0.0191, 0.0088) mesh=camera
+dome_cercle parent=structure p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (0.0000, 0.0000, -5.3088), Extents: (0.0571, 0.0572, 0.0052) mesh=dome_cercle
+tray_rpi parent=structure p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (0.0000, 0.0000, -5.5191), Extents: (0.0426, 0.0030, 0.0330) mesh=tray_rpi
+rpi_navigator parent=tray_rpi p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (0.0007, 0.0177, -5.5094), Extents: (0.0298, 0.0147, 0.0467) mesh=rpi_navigator
+servo_mount parent=structure p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (0.0000, -0.0123, -5.7848), Extents: (0.0669, 0.0108, 0.0898) mesh=servo_mount
+underwater_servo parent=servo_mount p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (0.0000, -0.0300, -5.8288), Extents: (0.0160, 0.0400, 0.0432) mesh=underwater_servo
+aileron 2 parent=aileron_down_back p=(0.0000, -0.0550, -0.1000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (0.0050, -0.1050, -5.6970), Extents: (0.0050, 0.0500, 0.0750) mesh=Part_1
+aileron 1 parent=aileron_up_back p=(0.0000, 0.0550, -0.1000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (-0.0050, 0.1050, -5.6970), Extents: (0.0050, 0.0500, 0.0750) mesh=Part_1
+aileron 2 parent=aileron_down_front p=(0.0000, -0.0550, 0.2000) scale=(0.8000, 0.8000, 0.8000) bounds=Center: (0.0040, -0.0950, -5.3820), Extents: (0.0040, 0.0400, 0.0600) mesh=Part_1
+aileron 1 parent=aileron_up_front p=(0.0000, 0.0550, 0.2000) scale=(0.8000, 0.8000, 0.8000) bounds=Center: (-0.0040, 0.0950, -5.3820), Extents: (0.0040, 0.0400, 0.0600) mesh=Part_1
+tray_battery parent=MasseMobile p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (-0.0002, -0.0190, -5.5139), Extents: (0.0426, 0.0230, 0.0733) mesh=tray_battery
+battery parent=tray_battery p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (-0.0002, -0.0275, -5.5169), Extents: (0.0233, 0.0130, 0.0690) mesh=battery
+underwater_servo_hub parent=nageoire p=(0.0000, 0.0000, 0.0000) scale=(1.0000, 1.0000, 1.0000) bounds=Center: (0.0000, 0.0065, -5.8470), Extents: (0.0100, 0.0046, 0.0100) mesh=underwater_servo_hub
+bras parent=lien Servo-bras p=(0.0000, 0.0140, -0.3550) scale=(0.0300, 0.0200, 0.0900) bounds=Center: (0.0000, 0.0140, -5.8770), Extents: (0.0150, 0.0100, 0.0450) mesh=Cube
+nageoire parent=lien bras_nageoire p=(0.0000, 0.0140, -0.4050) scale=(0.0060, 0.0800, 0.0300) bounds=Center: (0.0000, 0.0140, -5.9270), Extents: (0.0030, 0.0400, 0.0150) mesh=Cube
+nageoire (1) parent=articulation p=(0.0000, 0.0140, -0.4350) scale=(0.0060, 0.0800, 0.0300) bounds=Center: (0.0000, 0.0140, -5.9570), Extents: (0.0030, 0.0400, 0.0150) mesh=Cube
+nageoire (2) parent=articulation2 p=(0.0000, 0.0140, -0.4650) scale=(0.0060, 0.0800, 0.0300) bounds=Center: (0.0000, 0.0140, -5.9870), Extents: (0.0030, 0.0400, 0.0150) mesh=Cube
+nageoire 3 parent=articulation3 p=(0.0000, 0.0140, -0.4950) scale=(0.0060, 0.0800, 0.0300) bounds=Center: (0.0000, 0.0140, -6.0170), Extents: (0.0030, 0.0400, 0.0150) mesh=Cube
+nageoire 4 parent=articulation4 p=(0.0000, 0.0140, -0.5250) scale=(0.0060, 0.0800, 0.0300) bounds=Center: (0.0000, 0.0140, -6.0470), Extents: (0.0030, 0.0400, 0.0150) mesh=Cube
+nageoire 5 parent=articulation5 p=(0.0000, 0.0140, -0.5550) scale=(0.0060, 0.0800, 0.0300) bounds=Center: (0.0000, 0.0140, -6.0770), Extents: (0.0030, 0.0400, 0.0150) mesh=Cube
+nageoire 6 parent=articulation6 p=(0.0000, 0.0140, -0.5850) scale=(0.0060, 0.0800, 0.0300) bounds=Center: (0.0000, 0.0140, -6.1070), Extents: (0.0030, 0.0400, 0.0150) mesh=Cube
+nageoire 7 parent=articulation7 p=(0.0000, 0.0140, -0.6150) scale=(0.0060, 0.0800, 0.0300) bounds=Center: (0.0000, 0.0140, -6.1370), Extents: (0.0030, 0.0400, 0.0150) mesh=Cube
+nageoire 8 parent=articulation8 p=(0.0000, 0.0140, -0.6450) scale=(0.0060, 0.0800, 0.0300) bounds=Center: (0.0000, 0.0140, -6.1670), Extents: (0.0030, 0.0400, 0.0150) mesh=Cube
+nageoire 6 parent=articulation9 p=(0.0000, 0.0140, -0.6750) scale=(0.0060, 0.0800, 0.0300) bounds=Center: (0.0000, 0.0140, -6.1970), Extents: (0.0030, 0.0400, 0.0150) mesh=Cube
+nageoire 6 parent=articulation10 p=(0.0000, 0.0140, -0.7050) scale=(0.0060, 0.0800, 0.0300) bounds=Center: (0.0000, 0.0140, -6.2270), Extents: (0.0030, 0.0400, 0.0150) mesh=Cube

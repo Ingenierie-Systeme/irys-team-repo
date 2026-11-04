@@ -1,0 +1,1 @@
+PASS — native Play mode, Start/FixedUpdate/LateUpdate, 8 seconds, no simulation errors.

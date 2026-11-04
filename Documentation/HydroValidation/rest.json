@@ -1,0 +1,23 @@
+{
+    "name": "rest",
+    "dt": 0.0024999999441206455,
+    "seconds": 12.0,
+    "forward": -0.0002938294783234596,
+    "lateral": -0.000385974912205711,
+    "yaw": -0.17804114520549774,
+    "finalSpeed": 0.01582517847418785,
+    "maxSpeed": 0.020522741600871086,
+    "maxJointDeg": 0.2963663339614868,
+    "maxServoDeg": 0.03904665634036064,
+    "maxTrackingDeg": 0.03904665634036064,
+    "maxTargetSpeed": 0.0,
+    "maxTargetAcceleration": 0.0,
+    "lastRestSpeed": 0.0,
+    "peakAngularSpeed": 0.15714746713638306,
+    "finalPosition": {
+        "x": -0.000385974912205711,
+        "y": -0.03152748569846153,
+        "z": -0.0002938294783234596
+    },
+    "wallSeconds": 9.2496182
+}

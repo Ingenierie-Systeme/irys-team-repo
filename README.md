@@ -1,5 +1,7 @@
 # irys-team-repo
 
+Simulation hydro sur `simu-hydro` : ouvrir `Unity_robot/Assets/Scenes/SimulationHydro.unity`. [Commande u/v, hypothèses et validation](Documentation/SIMU_HYDRO.md).
+
 ## Members
 
 - Gaspard DELPIANO--MANFRINI
