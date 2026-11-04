@@ -2,12 +2,12 @@
 
 ## Members
 
-Gaspard DELPIANO--MANFRINI
-Mateo BRUN
-Noé CARRAYROU
-Eliaz YAHIA
-Clement SARTRE
-Lancelot RAMIS
+- Gaspard DELPIANO--MANFRINI
+- Mateo BRUN
+- Noé CARRAYROU
+- Eliaz YAHIA
+- Clement SARTRE
+- Lancelot RAMIS
 
 ## Présentation et objectifs
 
@@ -24,9 +24,24 @@ que l’enregistrement d’images et de données expérimentales.
 
 ![Env3D](images/environnement_3D.png)
 
+Bassin d'expérimentation de L'ENSTA modélisé en 3D sur Blender, puis exporté sur Unity.
+
+## Simulation Unity
+
+Le robot est simulé sous forme d'un corps articulé
+
+voir [README Unity](Unity_robot/READMEUnity.md) pour plus de détails sur la simualtion Unity
+
+
 ## Architecture logicielle
 
+Architecture logicielle désirée du contrôle du robot.
 ![Archilog](images/architecture_logicielle.png)
+
+Schéma des connexions des noeuds ROS de contrôle du robot:
+![Archilogros](images/rosgraph.png)
+
+voir [README ROS](ROS/workspace/src/READMEROS.md) pour plus de détails sur le fonctionnement des nœuds ROS.
 
 ## Schéma électrique
 

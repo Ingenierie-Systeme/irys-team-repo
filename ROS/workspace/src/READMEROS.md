@@ -31,17 +31,8 @@ Compte tenu des limitations du projet (pas de source de lumière embarquée, pas
 - tours dans le bassin ROB en autonomie pour tester les lois de commandes, les sécurités et l'assemblage du robot
 
 
-## ROS-TCP-Endpoint
-
-Le workspace inclut le paquet officiel Unity `ros_tcp_endpoint` comme sous-module
-Git, sur la branche ROS 2 `main-ros2`. Après un nouveau clonage du dépôt :
-
-```bash
-git submodule update --init --recursive
-```
-
-Compiler le workspace depuis `ROS/workspace` après avoir installé et sourcé une
-distribution ROS 2 :
+## Compiler et lancer les noeuds
+Compiler le workspace depuis `ROS/workspace` après avoir installé et sourcé une distribution ROS 2 :
 
 ```bash
 source /opt/ros/$ROS_DISTRO/setup.bash
@@ -50,11 +41,18 @@ colcon build --symlink-install
 source install/setup.bash
 ```
 
-Lancer l'endpoint TCP, les viewers IMU/GNSS/caméra, le moniteur de sécurité
-et l'estimateur d'état :
+Lancer l'endpoint TCP, les noeuds d'estimation, de pilotage et de contrôle du robot:
 
 ```bash
 ros2 launch robot_bringup robot_bringup.launch.py
+```
+
+## ROS-TCP-Endpoint
+
+Le workspace inclut le paquet officiel Unity `ros_tcp_endpoint` comme sous-module Git, sur la branche ROS 2 `main-ros2`. Après un nouveau clonage du dépôt :
+
+```bash
+git submodule update --init --recursive
 ```
 
 L'endpoint écoute par défaut sur `0.0.0.0:10000`. Configurer l'adresse IP de
@@ -199,8 +197,3 @@ correspond à ±`courseMax` (0,1 m par défaut). Le déplacement est limité par
 ros2 run robot_control servo_command_publisher
 ```
 
-## Création d'un package
-
-```bash
-ros2 pkg create --build-type ament_python <nom_package>
-```

@@ -292,9 +292,9 @@ ArticulationBody:
     target: 0
     targetVelocity: 0
     driveType: 0
-  m_LinearDamping: 0.05
-  m_AngularDamping: 0.05
-  m_JointFriction: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0
+  m_JointFriction: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -321,10 +321,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a4b7a1ad01630bfabc6fc75c1e382a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::masse_mobile_AB
+  topicName: /servo/masse_cmd
+  commandeMaxDegrees: 50
+  delaiCommandeSecondes: 1
   vitesse: 0.1
   courseMax: 0.1
-  toucheAvant: 273
-  toucheArriere: 274
 --- !u!1 &117912843
 GameObject:
   m_ObjectHideFlags: 0
@@ -923,9 +924,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7417cd18c09e7f042adf363c7e4e7532, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::aileron
-  amortissementLineaireX: 60
-  amortissementLineaireY: 2
-  amortissementLineaireZ: 2
+  amortissementLineaireX: 70
+  amortissementLineaireY: 1
+  amortissementLineaireZ: 1
   amortissementAngulaireX: 0
   amortissementAngulaireY: 80
   amortissementAngulaireZ: 10
@@ -5583,9 +5584,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::modif_damping
   amortissementLineaireX: 30
   amortissementLineaireY: 30
-  amortissementLineaireZ: 2
+  amortissementLineaireZ: 1
   amortissementAngulaireX: 10
-  amortissementAngulaireY: 10
+  amortissementAngulaireY: 20
   amortissementAngulaireZ: 0
 --- !u!23 &939470153632754882
 MeshRenderer:
@@ -6099,9 +6100,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7417cd18c09e7f042adf363c7e4e7532, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::aileron
-  amortissementLineaireX: 60
-  amortissementLineaireY: 2
-  amortissementLineaireZ: 2
+  amortissementLineaireX: 70
+  amortissementLineaireY: 1
+  amortissementLineaireZ: 1
   amortissementAngulaireX: 0
   amortissementAngulaireY: 80
   amortissementAngulaireZ: 10

@@ -17,6 +17,8 @@
 # Local assets exceed GitHub's 100 MB file limit.
 /Assets/Modèles/Piscine_ENSTA_ROB_with_textures.blend
 /Assets/Modèles/textures/brown_floor_tiles_disp.exr
+/Assets/Modèles/[Mm]aterials/
+/Assets/Modèles/textures/
 
 .utmp/
 /[Ll]ibrary/
