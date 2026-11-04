@@ -50,6 +50,11 @@ que l’enregistrement d’images et de données expérimentales.
 ![support_servo](images/support_petit_servomoteur1.png)
 ![support_servo2](images/support_petit_servomoteur2.png)
 
+### Support masse mobile
+
+![supportmm1](images/support_masse_mobile1.png)
+![supportmm2](images/support_masse_mobile2.png)
+
 # Hardware
 
 ## Schéma électrique
