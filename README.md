@@ -86,4 +86,10 @@ Pour se connecter à la raspberry pi, brancher d'abord la raspberrypi et connect
 puis rentrer le mdp : irys112
 
 
+# Les problèmes
+
+Mateo Brun, responsable soudure, en a trop marre des ses erreurs de ses collègues. En effet, celui ci a du ressouder les calbes aux powers module et a du aussi déssouder les cables du servomoteur pour faire passer le pénétrateur :
+
+![mateo_deprime](images/mateo_depression_ressoudure.jpg)
+
 
