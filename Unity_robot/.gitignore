@@ -13,6 +13,11 @@
 # Recommended: add any editor/OS/tool-specific ignore rules from the Global/ templates as needed.
 # See: https://github.com/github/gitignore/tree/main/Global
 #
+
+# Local assets exceed GitHub's 100 MB file limit.
+/Assets/Modèles/Piscine_ENSTA_ROB_with_textures.blend
+/Assets/Modèles/textures/brown_floor_tiles_disp.exr
+
 .utmp/
 /[Ll]ibrary/
 /[Tt]emp/
