@@ -1,79 +1,85 @@
 using UnityEngine;
 namespace Irys.Hydro
 {
-    // Integrates pressure on the upstream face of a closed mesh; no double-sided drag.
-    // Clips at the horizontal water plane. Velocity and force are evaluated in world SI units.
+    // Six equivalent directional surfaces. Mesh geometry is read once at initialization;
+    // the physics step uses only areas, centers and a smooth immersion fraction.
     public sealed class HydroSurface
     {
-        readonly Vector3[] vertices;
-        readonly Vector3[] world;
-        readonly int[] triangles;
         readonly Transform frame;
         readonly ArticulationBody body;
-        readonly Vector3[] clipped = new Vector3[4];
-        readonly float cd, cf;
-        readonly bool buoyant;
-        float signedVolume;
-        Vector3 volumeMoment, volumeOrigin;
-        Vector3 linearVelocity, angularVelocity, bodyCenter;
-        public Vector3 Force { get; private set; }
-        public Vector3 Torque { get; private set; }
-        public float Power { get; private set; }
-        public float DisplacedVolume => buoyant ? Mathf.Abs(signedVolume) : 0f;
+        readonly float cd, cf, volume;
+        readonly Bounds bounds;
+        readonly Vector3[] centers = new Vector3[6];
+        readonly float[] areas = new float[6];
+        static readonly Vector3[] normals = { Vector3.right, Vector3.left, Vector3.up, Vector3.down, Vector3.forward, Vector3.back };
+
         public HydroSurface(Mesh mesh, Transform frame, ArticulationBody body, float cd = 1.8f, float cf = .008f, bool buoyant = false)
         {
-            if(!mesh.isReadable)throw new System.InvalidOperationException("Enable Read/Write in the import settings of hydrodynamic mesh: "+mesh.name);
-            vertices = mesh.vertices; world=new Vector3[vertices.Length]; triangles = mesh.triangles; this.frame = frame; this.body = body; this.cd = cd; this.cf = cf; this.buoyant = buoyant;
-            float volume=0f;
-            for(int i=0;i<triangles.Length;i+=3) volume+=Vector3.Dot(vertices[triangles[i]],Vector3.Cross(vertices[triangles[i+1]],vertices[triangles[i+2]]));
-            if(volume<0f) for(int i=0;i<triangles.Length;i+=3) (triangles[i+1],triangles[i+2])=(triangles[i+2],triangles[i+1]);
-        }
-        public static Vector3 Drag(Vector3 velocity, Vector3 normal, float area, float cd, float cf)
-        {
-            float vn = Vector3.Dot(velocity, normal);
-            Vector3 vt = velocity - vn * normal;
-            return -.5f * RobotHydroDefinition.WaterDensity * area *
-                (cd * Mathf.Max(0f, vn) * Mathf.Max(0f, vn) * normal + cf * vt.magnitude * vt);
-        }
-        public void Step(Vector3 current)
-        {
-            Force = Vector3.zero; Torque=Vector3.zero; Power = 0f;
-            signedVolume=0f;volumeMoment=Vector3.zero;
-            volumeOrigin=new Vector3(frame.position.x,RobotHydroDefinition.WaterLevel,frame.position.z);
-            Matrix4x4 matrix=frame.localToWorldMatrix;
-            for(int i=0;i<vertices.Length;i++) world[i]=matrix.MultiplyPoint3x4(vertices[i]);
-            linearVelocity=body.linearVelocity;angularVelocity=body.angularVelocity;bodyCenter=body.worldCenterOfMass;
+            this.frame = frame; this.body = body; this.cd = cd; this.cf = cf;
+            bounds = mesh.bounds;
+            // Project triangle areas onto the three local axes, once. This keeps the CAO
+            // silhouette areas without evaluating individual triangles during simulation.
+            var vertices = mesh.vertices; var triangles = mesh.triangles;
+            float signedVolume = 0f;
             for (int i = 0; i < triangles.Length; i += 3)
             {
-                Vector3 a = world[triangles[i]], b = world[triangles[i + 1]], c = world[triangles[i + 2]];
-                int count = 0;
-                Edge(c, a, ref count); Edge(a, b, ref count); Edge(b, c, ref count);
-                for (int j = 1; j + 1 < count; j++) Apply(clipped[0], clipped[j], clipped[j + 1], current);
+                Vector3 a = vertices[triangles[i]], b = vertices[triangles[i+1]], c = vertices[triangles[i+2]];
+                Vector3 cross = Vector3.Cross(b-a, c-a) * .5f;
+                Vector3 center = (a+b+c)/3f;
+                signedVolume += Vector3.Dot(a, Vector3.Cross(b,c))/6f;
+                for (int axis = 0; axis < 3; axis++)
+                {
+                    int face = 2*axis + (cross[axis] < 0f ? 1 : 0);
+                    float area = Mathf.Abs(cross[axis]);
+                    areas[face] += area; centers[face] += area*center;
+                }
             }
-            // The missing cap lies in the plane through volumeOrigin and has zero tetrahedral volume.
-            if(buoyant && Mathf.Abs(signedVolume)>1e-12f)
-                body.AddForceAtPosition(Vector3.up*(Mathf.Abs(signedVolume)*RobotHydroDefinition.WaterDensity*9.81f),volumeMoment/signedVolume);
-            body.AddForce(Force,ForceMode.Force);body.AddTorque(Torque,ForceMode.Force);
+            for (int i = 0; i < 6; i++)
+                if (areas[i] > 0f) centers[i] /= areas[i];
+            volume = buoyant ? Mathf.Abs(signedVolume) : 0f;
         }
-        void Edge(Vector3 a, Vector3 b, ref int count)
+
+        public HydroSurface(Bounds bounds, Transform frame, ArticulationBody body)
         {
-            bool insideA = a.y <= RobotHydroDefinition.WaterLevel, insideB = b.y <= RobotHydroDefinition.WaterLevel;
-            if (insideA != insideB) clipped[count++] = Vector3.LerpUnclamped(a, b, (RobotHydroDefinition.WaterLevel - a.y) / (b.y - a.y));
-            if (insideB) clipped[count++] = b;
-        }
-        void Apply(Vector3 a, Vector3 b, Vector3 c, Vector3 current)
-        {
-            Vector3 cross = Vector3.Cross(b - a, c - a);
-            float twiceArea = cross.magnitude;
-            if (twiceArea < 1e-10f) return;
-            if(buoyant)
+            this.bounds = bounds; this.frame = frame; this.body = body; cd = 1.8f; cf = .008f;
+            for (int i = 0; i < 6; i++)
             {
-                float volume=Vector3.Dot(a-volumeOrigin,Vector3.Cross(b-volumeOrigin,c-volumeOrigin))/6f;
-                signedVolume+=volume;volumeMoment+=volume*(volumeOrigin+a+b+c)*.25f;
+                int axis = i/2;
+                centers[i] = bounds.center + Vector3.Scale(normals[i], bounds.extents);
+                areas[i] = bounds.size[(axis+1)%3]*bounds.size[(axis+2)%3];
             }
-            Vector3 p = (a + b + c) / 3f, velocity = linearVelocity+Vector3.Cross(angularVelocity,p-bodyCenter)-current;
-            Vector3 force = Drag(velocity, cross / twiceArea, twiceArea * .5f, cd, cf);
-            Force += force; Torque+=Vector3.Cross(p-bodyCenter,force); Power += Vector3.Dot(force, velocity);
+        }
+
+        public void Step(Vector3 current)
+        {
+            Matrix4x4 matrix = frame.localToWorldMatrix;
+            Matrix4x4 normalMatrix = matrix.inverse.transpose;
+            float scaleVolume = Mathf.Abs(matrix.determinant);
+            Vector3 size = bounds.size;
+            float height = Mathf.Max(1e-5f, Mathf.Abs(matrix.MultiplyVector(Vector3.right*size.x).y)
+                + Mathf.Abs(matrix.MultiplyVector(Vector3.up*size.y).y)
+                + Mathf.Abs(matrix.MultiplyVector(Vector3.forward*size.z).y));
+            Vector3 center = matrix.MultiplyPoint3x4(bounds.center);
+            float immersed = Mathf.Clamp01(.5f + (RobotHydroDefinition.WaterLevel-center.y)/height);
+            if (immersed <= 0f) return;
+            // A single partial-immersion approximation for each element, without clipping.
+            Vector3 wetOffset = Vector3.down*(.5f*height*(1f-immersed));
+            for (int i = 0; i < 6; i++)
+            {
+                if (areas[i] <= 0f) continue;
+                Vector3 normal = normalMatrix.MultiplyVector(normals[i]);
+                float area = areas[i]*scaleVolume*normal.magnitude*immersed;
+                normal.Normalize();
+                Vector3 p = matrix.MultiplyPoint3x4(centers[i]) + wetOffset;
+                Vector3 velocity = body.linearVelocity + Vector3.Cross(body.angularVelocity,p-body.worldCenterOfMass) - current;
+                float vn = Mathf.Max(0f,Vector3.Dot(velocity,normal));
+                Vector3 tangent = velocity - Vector3.Dot(velocity,normal)*normal;
+                Vector3 force = -.5f*RobotHydroDefinition.WaterDensity*area*
+                    (cd*vn*vn*normal + cf*tangent.magnitude*tangent);
+                body.AddForceAtPosition(force,p);
+            }
+            if (volume > 0f)
+                body.AddForceAtPosition(Vector3.up*(RobotHydroDefinition.WaterDensity*9.81f*volume*scaleVolume*immersed),center+wetOffset);
         }
     }
 }

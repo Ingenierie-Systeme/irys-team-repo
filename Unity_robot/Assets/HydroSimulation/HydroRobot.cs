@@ -22,7 +22,6 @@ namespace Irys.Hydro
         public float ServoTarget { get; private set; }
         public float ServoAngle => servo.jointPosition.dofCount > 0 ? servo.jointPosition[0] * Mathf.Rad2Deg : 0f;
         public float TorqueLimit { get; private set; }
-        public float DragPower { get; private set; }
         public float SubmergedVolume { get; private set; }
         public int Steps { get; private set; }
         public float TimeSimulated { get; private set; }
@@ -34,7 +33,8 @@ namespace Irys.Hydro
         Vector3[] skinPoints;
         Mesh skin;
         Transform skinFrame;
-        const float Cell = .01f;
+        const int RadialSamples = 4, AxialSamples = 12;
+        Vector3 cellSize;
         bool initialized;
         void Awake() { Time.fixedDeltaTime=RobotHydroDefinition.StepSeconds; }
 
@@ -47,21 +47,18 @@ namespace Irys.Hydro
             float ds = RobotHydroDefinition.TailLength / sections.Length;
             foreach (var section in sections)
             {
-                GameObject panel = new GameObject("HydroPanel");
-                panel.transform.SetParent(section.transform, false);
-                panel.transform.localPosition = Vector3.back * ds * .5f;
-                panel.transform.localScale = new Vector3(RobotHydroDefinition.TailThickness, RobotHydroDefinition.TailHeight, ds);
-                Mesh mesh = BoxMesh(); transientMeshes.Add(mesh);
-                surfaces.Add(new HydroSurface(mesh, panel.transform, section));
+                var bounds = new Bounds(Vector3.back * ds * .5f,
+                    new Vector3(RobotHydroDefinition.TailThickness, RobotHydroDefinition.TailHeight, ds));
+                surfaces.Add(new HydroSurface(bounds, section.transform, section));
             }
-            int nz = Mathf.RoundToInt(RobotHydroDefinition.HullLength / Cell);
-            int nr = Mathf.CeilToInt(2f * RobotHydroDefinition.HullRadius / Cell);
-            for (int z = 0; z < nz; z++) for (int x = 0; x < nr; x++) for (int y = 0; y < nr; y++)
+            cellSize = new Vector3(2f*RobotHydroDefinition.HullRadius/RadialSamples,
+                2f*RobotHydroDefinition.HullRadius/RadialSamples, RobotHydroDefinition.HullLength/AxialSamples);
+            for (int z = 0; z < AxialSamples; z++) for (int x = 0; x < RadialSamples; x++) for (int y = 0; y < RadialSamples; y++)
             {
-                Vector3 p = new Vector3((x + .5f - nr / 2f) * Cell, (y + .5f - nr / 2f) * Cell, (z + .5f - nz / 2f) * Cell);
-                if (p.x * p.x + p.y * p.y <= RobotHydroDefinition.HullRadius * RobotHydroDefinition.HullRadius) cells.Add(p);
+                Vector3 p = Vector3.Scale(new Vector3(x+.5f-RadialSamples/2f, y+.5f-RadialSamples/2f, z+.5f-AxialSamples/2f),cellSize);
+                if (p.x*p.x+p.y*p.y <= RobotHydroDefinition.HullRadius*RobotHydroDefinition.HullRadius) cells.Add(p);
             }
-            cellVolume = Mathf.PI * RobotHydroDefinition.HullRadius * RobotHydroDefinition.HullRadius * RobotHydroDefinition.HullLength / cells.Count;
+            cellVolume = Mathf.PI*RobotHydroDefinition.HullRadius*RobotHydroDefinition.HullRadius*RobotHydroDefinition.HullLength/cells.Count;
             BuildSkin();
         }
 
@@ -106,8 +103,7 @@ namespace Irys.Hydro
             drive.target = ServoTarget; drive.targetVelocity = targetSpeed; drive.forceLimit = TorqueLimit;
             servo.xDrive = drive;
             Buoyancy();
-            DragPower = 0f;
-            foreach (var surface in surfaces) { surface.Step(current); DragPower += surface.Power; }
+            foreach (var surface in surfaces) surface.Step(current);
             float ds = RobotHydroDefinition.TailLength / sections.Length;
             foreach (var section in sections)
             {
@@ -123,7 +119,7 @@ namespace Irys.Hydro
             SubmergedVolume = 0f; Vector3 moment = Vector3.zero;
             Vector3 up = hull.transform.InverseTransformDirection(Vector3.up);
             Matrix4x4 matrix=hull.transform.localToWorldMatrix;
-            float height = Cell * (Mathf.Abs(up.x) + Mathf.Abs(up.y) + Mathf.Abs(up.z));
+            float height = cellSize.x*Mathf.Abs(up.x) + cellSize.y*Mathf.Abs(up.y) + cellSize.z*Mathf.Abs(up.z);
             foreach (Vector3 cell in cells)
             {
                 Vector3 p = matrix.MultiplyPoint3x4(cell);
@@ -183,15 +179,6 @@ namespace Irys.Hydro
                 }
             }
             skin.vertices = skinPoints; skin.RecalculateNormals(); skin.RecalculateBounds();
-        }
-        public static Mesh BoxMesh()
-        {
-            // Reuse Unity's closed, outward-oriented primitive geometry without persisting an object.
-            GameObject box = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            Mesh result = Instantiate(box.GetComponent<MeshFilter>().sharedMesh);
-            box.SetActive(false);
-            if(Application.isPlaying) Destroy(box); else DestroyImmediate(box);
-            return result;
         }
         void OnDestroy() { foreach (Mesh mesh in transientMeshes) if (mesh != null) { if(Application.isPlaying) Destroy(mesh); else DestroyImmediate(mesh); } }
         void OnGUI()

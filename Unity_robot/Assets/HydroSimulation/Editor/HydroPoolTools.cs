@@ -167,11 +167,7 @@ public static class HydroPoolTools
         camera.overviewTarget = surface.center + Vector3.down*.45f;
         camera.overview = true;
         camera.RefreshView();
-        Directory.CreateDirectory("../Documentation/HydroValidation");
-        File.WriteAllText("../Documentation/HydroValidation/pool.json",JsonUtility.ToJson(new PoolReport {
-            prefab=PrefabPath,waterLevel=surface.center.y,waterCenter=surface.center,waterSize=surface.size,floorY=floor.center.y,
-            meshes=pool.GetComponentsInChildren<MeshFilter>(true).Length, overview=camera.overviewPosition
-        },true));
+
     }
 
     static void Boundary(Transform parent,string name,Vector3 center,Vector3 size)
@@ -211,5 +207,4 @@ public static class HydroPoolTools
         }
         return nearest;
     }
-    [Serializable] sealed class PoolReport { public string prefab;public float waterLevel,floorY;public Vector3 waterCenter,waterSize,overview;public int meshes; }
 }

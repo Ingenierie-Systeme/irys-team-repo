@@ -117,7 +117,6 @@ public static class HydroSceneTools
         Debug.Log("HYDRO_BUILD_OK fins="+fins.Count+" sourceTubeCenter="+center.ToString("F4")+" E="+RobotHydroDefinition.YoungModulus);
     }
 
-    public static void BuildAndValidate() { Build(); HydroValidation.Run(); }
 
     static Material MaterialAsset(string name,Color color,float metallic)
     {
