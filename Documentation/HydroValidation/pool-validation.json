@@ -1,0 +1,13 @@
+{
+    "status": "PASS",
+    "prefab": "Assets/Environment/Pool/Piscine_ENSTA_ROB.prefab",
+    "meshes": 24,
+    "vertices": 2540041,
+    "textures": 6,
+    "collisionBoundaries": 5,
+    "waterLevel": 0.0,
+    "width": 10.06092357635498,
+    "length": 15.804804801940918,
+    "depth": 6.976045608520508,
+    "portableWithoutBlender": true
+}

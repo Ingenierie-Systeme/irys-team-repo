@@ -1,10 +1,11 @@
 # Simulation hydro IRYS — branche simu-hydro
 
-Ouvrir le projet `Unity_robot` du dossier de travail `irys-simu-hydro` avec **Unity 6000.6.5f1**, puis **Assets/Scenes/SimulationHydro.unity** et Play. Le projet principal et ses changements locaux sont conservés dans `irys-team-repo`.
+Ouvrir **`irys-team-repo/Unity_robot`**, sur la branche **`simu-hydro`**, avec **Unity 6000.6.5f1**, puis **Assets/Scenes/SimulationHydro.unity** et Play. La scène est créée et vérifiée directement dans ce dépôt.
 
 - Haut/bas ou W/S : augmenter/diminuer `u` (la valeur reste mémorisée).
 - Gauche/droite ou A/D : `v` signé ; relâcher ramène progressivement la consigne moyenne à zéro.
 - Espace : demander l'arrêt ; amplitude et fréquence décroissent progressivement.
+- Tab : basculer entre la vue intérieure de la piscine et le suivi rapproché du robot. La scène démarre sur la piscine ; une étiquette indique la position du robot.
 - Pour une entrée externe, désactiver `keyboard` sur `IRYS_Hydro > HydroRobot`, puis affecter les champs `u` et `v`. L'inspecteur permet également de les saisir pendant Play.
 
 Le HUD affiche les entrées, la fréquence, la demi-amplitude, l'angle moyen filtré, la cible et l'angle réel du servo, la limite instantanée de couple et la vitesse du robot. Les paramètres matériels sont centralisés dans `Assets/HydroSimulation/RobotHydroDefinition.cs`. La scène ne fait pas varier les dimensions ou les matériaux en cours de simulation.
@@ -74,7 +75,19 @@ Les rapports et CSV sont enregistrés dans `Documentation/HydroValidation` : rep
 
 Le menu **IRYS > Hydro > Construire la scène de référence** assemble la scène à partir de `SampleScene`. Il refuse d'écraser une scène déjà présente. Après un changement des dimensions matérielles, sauvegarder la scène courante, la retirer de son chemin de référence, puis reconstruire ; modifier seulement les constantes sans reconstruire laisserait les masses/liaisons de la scène précédente.
 
-Le dossier de travail utilise un checkout partiel : les textures volumineuses de piscine, les images documentaires et le fichier Blender de piscine n'ont pas été téléchargés. Ils ne sont pas nécessaires à `SimulationHydro`, qui utilise les maillages OBJ et ses matériaux propres. Le dossier `Modèles/materials` de la piscine est renommé `PoolMaterials` avec conservation des GUID pour résoudre son conflit de casse avec `Materials` dans Unity.
+## Piscine originale intégrée le 5 novembre 2026
+
+La scène utilise maintenant **l'asset original de la piscine ENSTA**, exporté depuis `Piscine_ENSTA_ROB_with_textures.blend`, fourni dans `irys-copy`. Son prefab autonome est `Assets/Environment/Pool/Piscine_ENSTA_ROB.prefab` : 24 maillages, 2 540 041 sommets, 12 matériaux et 6 textures de couleur d'origine. Les positions relatives, les formes, les UV et le découpage en sous-maillages sont conservés. Les anciennes primitives de bassin et la grille ajoutée ont été retirées.
+
+Les maillages sont stockés sans perte dans des fichiers `.poolmesh` compressés. `HydroPoolMeshImporter` les importe en Mesh Unity ordinaires ; Blender et le fichier source de 731 Mo ne sont pas nécessaires pour ouvrir ou construire la scène récupérée depuis Git. Les textures de couleur sont copiées sans modification de leurs fichiers ; leur taille maximale d'import GPU est de 2 048 pixels. Les cartes EXR de relief/roughness volumineuses ne sont pas embarquées dans ce prefab. La provenance et les empreintes des fichiers sont consignées dans `Assets/Environment/Pool/PROVENANCE.json`.
+
+Le bassin est mesuré sur la géométrie originale : **10,061 × 15,805 m** à la surface, avec un fond à **−6,976 m** dans le repère de la simulation. La piscine est translatée pour faire coïncider sa surface d'eau avec **Y=0**, commun au rendu et aux efforts hydro. La surface d'eau épouse l'ouverture du bassin. Quatre collisions de paroi et une collision de fond bornent le volume ; la charpente et les chaînes restent des éléments visuels.
+
+La touche **Tab** alterne entre le cadrage intérieur de la piscine et le suivi du robot. Le menu **IRYS > Hydro > Intégrer la piscine CAO** réinstalle l'environnement à partir du prefab livré, sans toucher aux paramètres physiques du robot. Les contrôles de dépendances, de textures, de dimensions, de collisions et des deux cadrages passent dans `irys-team-repo/Unity_robot`, ainsi qu'un nouvel essai de 8 s en mode Play. Voir `HydroValidation/pool-validation.json`.
+
+Le dossier de matériaux historique `Modèles/materials` a été renommé `PoolMaterials` avec conservation des GUID pour résoudre son conflit de casse avec `Materials` dans Unity. Le prefab de piscine utilise ses propres matériaux et textures portables.
+
+![Piscine originale dans la scène hydro](HydroValidation/pool-overview.png)
 
 ## Résultats de la référence du 4 novembre 2026
 
@@ -90,7 +103,7 @@ L'éditeur Unity 6000.6.5f1 a aussi émis une exception de son indexeur `UnityEd
 
 ![Aperçu de la scène](HydroValidation/preview.png)
 
-[Vidéo de 15 s à 25 images/s](HydroValidation/demo.mp4) : repos, propulsion, virage et arrêt progressif. Les repères de fond sont espacés de 50 cm. La vidéo est un export hors écran à cadence fixe, pas une mesure des performances temps réel.
+[Vidéo de 15 s à 25 images/s](HydroValidation/demo.mp4) : repos, propulsion, virage et arrêt progressif. Le début présente la piscine originale, puis la caméra suit le robot. La vidéo est un export hors écran à cadence fixe, pas une mesure des performances temps réel.
 
 ![Commande et mesures](HydroValidation/command-and-validation.png)
 
