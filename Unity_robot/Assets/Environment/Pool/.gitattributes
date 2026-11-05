@@ -1,0 +1,3 @@
+/Meshes/*.poolmesh binary
+/Textures/*.jpg binary -filter
+/Textures/*.png binary -filter

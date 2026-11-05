@@ -1,0 +1,44 @@
+{
+  "source": "Piscine_ENSTA_ROB_with_textures.blend supplied in irys-copy/Assets/Modèles",
+  "source_sha256": "dfcdf8cb16336c744966bbdc9375f8c901fbd7fbc3ed78da45efb1296a6ed8b4",
+  "source_bytes": 765760921,
+  "unity_editor": "6000.6.5f1",
+  "mesh_storage": "Lossless gzip of Unity serialized Mesh; imported by HydroPoolMeshImporter",
+  "mesh_count": 24,
+  "material_count": 12,
+  "geometry_and_uvs_preserved": true,
+  "textures_are_original_files": true,
+  "albedo_textures": [
+    {
+      "file": "Textures/asphalt_04_diff_4k.jpg",
+      "sha256": "8bdcf7db4ca716160802c32d548e0c342d11ea50eeea97791fde9cb957cc8616",
+      "bytes": 17095862
+    },
+    {
+      "file": "Textures/beige_wall_001_diff_4k.jpg",
+      "sha256": "80062445c4122f72bd067cbc4ac511146c6a7de4a3bb4fe78237c9838e4def37",
+      "bytes": 1103790
+    },
+    {
+      "file": "Textures/brown_floor_tiles_diff_4k.jpg",
+      "sha256": "8e5b8f150b001b463e18b97ea318cbee9f777add4425f63449d7dbc95bd72d49",
+      "bytes": 13748791
+    },
+    {
+      "file": "Textures/concrete_floor_worn_001_diff_4k.jpg",
+      "sha256": "73a4f3fe96a2c31d34dd7e7af5f1db440362eed770c38384ee2948e10419e4fb",
+      "bytes": 1916459
+    },
+    {
+      "file": "Textures/oak_veneer_01_diff_4k.jpg",
+      "sha256": "7e8c64811e580ef6664c20524606359c739e6fe030eff5c2c06c3482ecc8b1cf",
+      "bytes": 12587069
+    },
+    {
+      "file": "Textures/terlenka_anisotropy_rotation_4k.png",
+      "sha256": "8bbb4475c393e1f06a59b24db2e40d8af53de88dc6fb6ea0e84da4181f329d2a",
+      "bytes": 32749691
+    }
+  ],
+  "excluded_maps": "Heavy EXR normal/height/roughness maps; portable materials retain albedo and scalar values."
+}

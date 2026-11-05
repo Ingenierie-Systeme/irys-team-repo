@@ -22,9 +22,12 @@ public static class HydroPreview
         camera.targetTexture=target;
         try
         {
+            // Prime the render pipeline before recording its first ambient-lit frame.
+            camera.GetComponent<HydroCamera>().RefreshView();camera.Render();camera.Render();
             for(int frame=0;frame<frames;frame++)
             {
                 float t=(float)frame/fps;
+                camera.GetComponent<HydroCamera>().overview=t<2f;
                 robot.u=t<2f || t>=11f?0f:.8f;robot.v=t>=8f && t<11f?.7f:0f;
                 for(int step=0;step<Mathf.RoundToInt(1f/fps/RobotHydroDefinition.StepSeconds);step++)
                 {robot.Step(RobotHydroDefinition.StepSeconds);Physics.Simulate(RobotHydroDefinition.StepSeconds);}
@@ -32,6 +35,7 @@ public static class HydroPreview
                 camera.Render();RenderTexture.active=target;
                 pixels.ReadPixels(new Rect(0,0,width,height),0,0);pixels.Apply();RenderTexture.active=null;
                 byte[] png=pixels.EncodeToPNG();File.WriteAllBytes(Path.Combine(output,$"frame-{frame:D4}.png"),png);
+                if(frame==25)File.WriteAllBytes("../Documentation/HydroValidation/pool-overview.png",png);
                 if(frame==190)File.WriteAllBytes("../Documentation/HydroValidation/preview.png",png);
                 if(frame%50==0)Debug.Log("HYDRO_PREVIEW_FRAME "+frame+"/"+frames);
             }

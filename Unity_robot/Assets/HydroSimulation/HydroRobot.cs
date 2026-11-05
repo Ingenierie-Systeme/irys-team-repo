@@ -197,9 +197,10 @@ namespace Irys.Hydro
         void OnGUI()
         {
             if (!showHud) return;
-            GUILayout.BeginArea(new Rect(18, 18, 390, 235), GUI.skin.box);
+            GUILayout.BeginArea(new Rect(18, 18, 390, 260), GUI.skin.box);
             GUILayout.Label("IRYS — simulation hydro / palme PVC rigide");
             GUILayout.Label("↑↓ : propulsion   ←→ : virage   Espace : arrêt");
+            GUILayout.Label("Tab : vue de la piscine / suivi du robot");
             GUILayout.Label($"u = {u:F2}    v = {v:F2}");
             GUILayout.Label($"f = {Setpoint.frequencyHz:F2} Hz    A = {Setpoint.amplitudeDeg:F1}°    α moyen = {Setpoint.meanDeg:F1}°");
             GUILayout.Label($"Servo : {ServoAngle:F1}° / cible {ServoTarget:F1}°");

@@ -107,18 +107,10 @@ public static class HydroSceneTools
         camera.nearClipPlane=.02f; camera.farClipPlane=100; camera.fieldOfView=43f; camera.backgroundColor=new Color(.06f,.18f,.25f); camera.clearFlags=CameraClearFlags.SolidColor;
         cameraObject.AddComponent<HydroCamera>().target=root.transform;
         cameraObject.transform.position=root.transform.position+new Vector3(1.05f,.8f,-1.5f); cameraObject.transform.LookAt(root.transform.position+Vector3.back*.15f);
-        var floor=GameObject.CreatePrimitive(PrimitiveType.Cube);floor.name="Fond_du_bassin";floor.transform.position=new Vector3(0,-1.05f,0);floor.transform.localScale=new Vector3(30,.1f,30);
-        floor.GetComponent<Renderer>().sharedMaterial=MaterialAsset("Bassin",new Color(.16f,.30f,.35f),0f);
-        AddGrid();
-        // A translucent surface leaves the robot readable from above.
-        var water=GameObject.CreatePrimitive(PrimitiveType.Plane);water.name="Surface_eau_Y0";water.transform.localScale=Vector3.one*3;
-        UnityEngine.Object.DestroyImmediate(water.GetComponent<Collider>());
         Material waterMaterial=MaterialAsset("Eau",new Color(.10f,.55f,.66f,.12f),.3f);
         waterMaterial.SetFloat("_Surface",1);waterMaterial.SetFloat("_SrcBlend",(float)UnityEngine.Rendering.BlendMode.SrcAlpha);waterMaterial.SetFloat("_DstBlend",(float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
         waterMaterial.SetFloat("_ZWrite",0);waterMaterial.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");waterMaterial.renderQueue=3000;
-        water.GetComponent<Renderer>().sharedMaterial=waterMaterial;
-        water.GetComponent<Renderer>().shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;
-        water.GetComponent<Renderer>().receiveShadows=false;
+        HydroPoolTools.Attach(scene);
         EditorSceneManager.SaveScene(scene,ScenePath);
         EditorBuildSettings.scenes=EditorBuildSettings.scenes.Where(s=>s.path!=ScenePath).Concat(new[]{new EditorBuildSettingsScene(ScenePath,true)}).ToArray();
         AssetDatabase.SaveAssets();
@@ -135,20 +127,6 @@ public static class HydroSceneTools
         material.SetColor("_BaseColor",color);material.SetFloat("_Metallic",metallic);material.SetFloat("_Smoothness",.45f);
         if(create)AssetDatabase.CreateAsset(material,Generated+name+".mat");else EditorUtility.SetDirty(material);
         return material;
-    }
-    static void AddGrid()
-    {
-        if(GameObject.Find("Reperes_fond_50cm")!=null)return;
-        var grid=new GameObject("Reperes_fond_50cm");
-        var material=MaterialAsset("Grille",new Color(.40f,.57f,.60f),0f);material.enableInstancing=true;
-        for(int i=-6;i<=6;i++)for(int axis=0;axis<2;axis++)
-        {
-            var line=GameObject.CreatePrimitive(PrimitiveType.Cube);line.name="Repere_"+axis+"_"+i;line.transform.SetParent(grid.transform,false);
-            line.transform.position=axis==0?new Vector3(i*.5f,-.998f,0):new Vector3(0,-.998f,i*.5f);
-            line.transform.localScale=axis==0?new Vector3(.004f,.001f,6f):new Vector3(6f,.001f,.004f);
-            UnityEngine.Object.DestroyImmediate(line.GetComponent<Collider>());
-            var renderer=line.GetComponent<Renderer>();renderer.sharedMaterial=material;renderer.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;
-        }
     }
     static ArticulationBody Body(GameObject obj,float mass,Vector3 size)
     {
