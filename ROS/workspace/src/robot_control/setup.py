@@ -25,7 +25,9 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'servo_command_publisher = robot_control.servo_command_publisher:main',
+            'servo_command_publisher = '
+            'robot_control.servo_command_publisher:main',
+            'crsf_joy_bridge = robot_control.crsf_joy_bridge:main',
         ],
     },
 )

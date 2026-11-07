@@ -2,7 +2,7 @@ import math
 
 
 FIN_SWIM_AMPLITUDE_DEGREES = 60.0
-FIN_SWIM_PERIOD_SECONDS = 2.0
+FIN_SWIM_PERIOD_SECONDS = 3.0
 FIN_MAX_ANGLE_DEGREES = 85.0
 MASS_MAX_ANGLE_DEGREES = 50.0
 
@@ -35,4 +35,23 @@ def convert_direction_to_servo_positions(
     )
     fin_angle = heading_degrees + fin_oscillation
     mass_angle = max(-1.0, min(direction_x, 1.0)) * MASS_MAX_ANGLE_DEGREES
+    return fin_angle, mass_angle
+
+
+def convert_rc_to_servo_positions(
+    throttle: float,
+    aileron: float,
+    elapsed_seconds: float,
+) -> tuple[float, float]:
+    """Convert normalized throttle and aileron channels into servo angles."""
+    throttle = max(-1.0, min(throttle, 1.0))
+    aileron = max(-1.0, min(aileron, 1.0))
+    fin_angle = (
+        FIN_SWIM_AMPLITUDE_DEGREES
+        * throttle
+        * math.sin(
+            2.0 * math.pi * elapsed_seconds / FIN_SWIM_PERIOD_SECONDS
+        )
+    )
+    mass_angle = aileron * MASS_MAX_ANGLE_DEGREES
     return fin_angle, mass_angle

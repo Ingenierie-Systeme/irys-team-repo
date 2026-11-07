@@ -80,7 +80,7 @@ def test_rejects_gnss_outlier():
     assert np.allclose(estimator.state[:3], 0.0)
 
 
-def test_pressure_update_corrects_only_vertical_position():
+def test_vertical_update_corrects_only_vertical_position():
     estimator = PositionVelocityFilter(initial_velocity_variance=1.0)
     estimator.initialize(np.zeros(3), np.eye(3))
 
@@ -96,7 +96,7 @@ def test_pressure_update_corrects_only_vertical_position():
     assert estimator.covariance[2, 2] < 1.0
 
 
-def test_rejects_pressure_outlier():
+def test_rejects_vertical_outlier():
     estimator = PositionVelocityFilter(initial_velocity_variance=1.0)
     estimator.initialize(np.zeros(3), np.eye(3) * 0.1)
 

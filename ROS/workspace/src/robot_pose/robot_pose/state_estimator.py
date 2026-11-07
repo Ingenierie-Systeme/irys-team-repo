@@ -16,12 +16,12 @@ from rclpy.qos import qos_profile_sensor_data
 from robot_pose.geometry import (
     GRAVITY_METERS_PER_SECOND_SQUARED,
     geodetic_to_enu,
-    pressure_to_depth,
     quaternion_rotate,
 )
 from robot_pose.kalman_filter import PositionVelocityFilter
 
-from sensor_msgs.msg import FluidPressure, Imu, NavSatFix, NavSatStatus
+from sensor_msgs.msg import Imu, NavSatFix, NavSatStatus
+from std_msgs.msg import Float32
 
 
 def message_timestamp(stamp: TimeMessage) -> float:
@@ -32,13 +32,13 @@ def message_timestamp(stamp: TimeMessage) -> float:
 
 
 class RobotStateEstimator(Node):
-    """Estimate ENU position and velocity from IMU, GNSS, and pressure."""
+    """Estimate ENU position and velocity from IMU, GNSS, and depth."""
 
     def __init__(self) -> None:
         super().__init__('robot_state_estimator')
-        self.declare_parameter('imu_topic', '/imu/data')
+        self.declare_parameter('imu_topic', '/state/imu')
         self.declare_parameter('gnss_topic', '/gnss/fix')
-        self.declare_parameter('pressure_topic', '/pressure')
+        self.declare_parameter('depth_topic', '/input/depth')
         self.declare_parameter('pose_topic', '/robot/pose')
         self.declare_parameter('origin_latitude', 48.39)
         self.declare_parameter('origin_longitude', -4.48)
@@ -50,16 +50,15 @@ class RobotStateEstimator(Node):
         self.declare_parameter('initial_velocity_variance', 25.0)
         self.declare_parameter('default_gnss_position_variance', 4.0)
         self.declare_parameter('gnss_mahalanobis_threshold', 16.27)
-        self.declare_parameter('water_density_kg_m3', 1000.0)
-        self.declare_parameter('default_pressure_depth_variance', 1.0)
-        self.declare_parameter('pressure_mahalanobis_threshold', 16.27)
+        self.declare_parameter('default_depth_variance', 1.0)
+        self.declare_parameter('depth_mahalanobis_threshold', 16.27)
         self.declare_parameter('gnss_reacquisition_timeout', 2.0)
         self.declare_parameter('max_gnss_reacquisition_distance', 50.0)
         self.declare_parameter('imu_includes_gravity', True)
 
         self.imu_topic = self.get_parameter('imu_topic').value
         self.gnss_topic = self.get_parameter('gnss_topic').value
-        self.pressure_topic = self.get_parameter('pressure_topic').value
+        self.depth_topic = self.get_parameter('depth_topic').value
         self.pose_topic = self.get_parameter('pose_topic').value
         self.origin_latitude = float(
             self.get_parameter('origin_latitude').value
@@ -84,14 +83,11 @@ class RobotStateEstimator(Node):
         self.gnss_mahalanobis_threshold = float(
             self.get_parameter('gnss_mahalanobis_threshold').value
         )
-        self.water_density_kg_m3 = float(
-            self.get_parameter('water_density_kg_m3').value
+        self.default_depth_variance = float(
+            self.get_parameter('default_depth_variance').value
         )
-        self.default_pressure_depth_variance = float(
-            self.get_parameter('default_pressure_depth_variance').value
-        )
-        self.pressure_mahalanobis_threshold = float(
-            self.get_parameter('pressure_mahalanobis_threshold').value
+        self.depth_mahalanobis_threshold = float(
+            self.get_parameter('depth_mahalanobis_threshold').value
         )
         self.gnss_reacquisition_timeout = float(
             self.get_parameter('gnss_reacquisition_timeout').value
@@ -132,25 +128,18 @@ class RobotStateEstimator(Node):
                 'gnss_mahalanobis_threshold doit être supérieur à zéro.'
             )
         if (
-            not math.isfinite(self.water_density_kg_m3)
-            or self.water_density_kg_m3 <= 0.0
+            not math.isfinite(self.default_depth_variance)
+            or self.default_depth_variance <= 0.0
         ):
             raise ValueError(
-                'water_density_kg_m3 doit être supérieur à zéro.'
+                'default_depth_variance doit être supérieur à zéro.'
             )
         if (
-            not math.isfinite(self.default_pressure_depth_variance)
-            or self.default_pressure_depth_variance <= 0.0
+            not math.isfinite(self.depth_mahalanobis_threshold)
+            or self.depth_mahalanobis_threshold <= 0.0
         ):
             raise ValueError(
-                'default_pressure_depth_variance doit être supérieur à zéro.'
-            )
-        if (
-            not math.isfinite(self.pressure_mahalanobis_threshold)
-            or self.pressure_mahalanobis_threshold <= 0.0
-        ):
-            raise ValueError(
-                'pressure_mahalanobis_threshold doit être supérieur à zéro.'
+                'depth_mahalanobis_threshold doit être supérieur à zéro.'
             )
         if self.gnss_reacquisition_timeout <= 0.0:
             raise ValueError(
@@ -170,14 +159,12 @@ class RobotStateEstimator(Node):
         self.last_imu_time: float | None = None
         self.last_imu_stamp: TimeMessage | None = None
         self.last_gnss_time: float | None = None
-        self.last_pressure_time: float | None = None
-        self.surface_pressure_pa: float | None = None
+        self.last_depth_time: float | None = None
         self.warned_invalid_imu = False
         self.warned_stale_imu = False
         self.warned_gnss_outlier = False
-        self.warned_invalid_pressure = False
-        self.warned_invalid_pressure_variance = False
-        self.warned_pressure_outlier = False
+        self.warned_invalid_depth = False
+        self.warned_depth_outlier = False
 
         self.pose_publisher = self.create_publisher(
             Odometry, self.pose_topic, 10
@@ -194,10 +181,10 @@ class RobotStateEstimator(Node):
             self.on_gnss,
             qos_profile_sensor_data,
         )
-        self.pressure_subscription = self.create_subscription(
-            FluidPressure,
-            self.pressure_topic,
-            self.on_pressure,
+        self.depth_subscription = self.create_subscription(
+            Float32,
+            self.depth_topic,
+            self.on_depth,
             qos_profile_sensor_data,
         )
         self.timer = self.create_timer(
@@ -206,7 +193,7 @@ class RobotStateEstimator(Node):
         )
         self.get_logger().info(
             f'Estimation de pose: {self.imu_topic} + {self.gnss_topic} + '
-            f'{self.pressure_topic} -> {self.pose_topic} '
+            f'{self.depth_topic} -> {self.pose_topic} '
             f'({self.world_frame} -> {self.body_frame}).'
         )
 
@@ -289,70 +276,39 @@ class RobotStateEstimator(Node):
                 nanosec=message.header.stamp.nanosec,
             )
 
-    def on_pressure(self, message: FluidPressure) -> None:
-        pressure_pa = float(message.fluid_pressure)
-        if not math.isfinite(pressure_pa) or pressure_pa <= 0.0:
-            if not self.warned_invalid_pressure:
+    def on_depth(self, message: Float32) -> None:
+        depth = float(message.data)
+        if not math.isfinite(depth):
+            if not self.warned_invalid_depth:
                 self.get_logger().warning(
-                    'Mesure de pression ignorée : la pression doit être '
-                    'finie et strictement positive.'
+                    'Mesure de profondeur ignorée : la profondeur doit être '
+                    'finie.'
                 )
-                self.warned_invalid_pressure = True
+                self.warned_invalid_depth = True
             return
 
-        stamp = message_timestamp(message.header.stamp)
+        stamp = time.monotonic()
         if (
-            self.last_pressure_time is not None
-            and stamp <= self.last_pressure_time
+            self.last_depth_time is not None
+            and stamp <= self.last_depth_time
         ):
             return
-        self.last_pressure_time = stamp
-
-        if self.surface_pressure_pa is None:
-            self.surface_pressure_pa = pressure_pa
-            self.get_logger().info(
-                f'Référence de pression de surface calibrée à '
-                f'{pressure_pa:.1f} Pa.'
-            )
-            return
-
-        depth = pressure_to_depth(
-            pressure_pa,
-            self.surface_pressure_pa,
-            self.water_density_kg_m3,
-        )
-        pressure_variance = float(message.variance)
-        if math.isfinite(pressure_variance) and pressure_variance > 0.0:
-            depth_variance = pressure_variance / (
-                self.water_density_kg_m3
-                * GRAVITY_METERS_PER_SECOND_SQUARED
-            )**2
-        else:
-            if (
-                not math.isfinite(pressure_variance)
-                or pressure_variance < 0.0
-            ) and not self.warned_invalid_pressure_variance:
-                self.get_logger().warning(
-                    'Variance de pression invalide ; utilisation de '
-                    'default_pressure_depth_variance.'
-                )
-                self.warned_invalid_pressure_variance = True
-            depth_variance = self.default_pressure_depth_variance
+        self.last_depth_time = stamp
 
         accepted = self.filter.update_vertical_position(
             -depth,
-            depth_variance,
-            self.pressure_mahalanobis_threshold,
+            self.default_depth_variance,
+            self.depth_mahalanobis_threshold,
         )
         if not accepted and self.filter.initialized:
-            if not self.warned_pressure_outlier:
+            if not self.warned_depth_outlier:
                 self.get_logger().warning(
-                    'Correction verticale de pression rejetée comme '
+                    'Correction verticale de profondeur rejetée comme '
                     'valeur aberrante.'
                 )
-                self.warned_pressure_outlier = True
+                self.warned_depth_outlier = True
         elif accepted:
-            self.warned_pressure_outlier = False
+            self.warned_depth_outlier = False
 
     def on_gnss(self, message: NavSatFix) -> None:
         if (

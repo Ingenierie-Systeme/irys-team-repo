@@ -32,11 +32,7 @@ class RobotBrain(Node):
             'obstacle_direction_topic',
             '/robot/obstacle_direction',
         )
-        self.declare_parameter(
-            'emergency_stop_topic',
-            '/safety/emergency_stop',
-        )
-        self.declare_parameter('direction_topic', '/robot/direction')
+        self.declare_parameter('direction_topic', '/commande/direction')
         self.declare_parameter('body_frame', 'base_link')
         self.declare_parameter('input_timeout_seconds', 0.5)
 
@@ -44,9 +40,7 @@ class RobotBrain(Node):
         self.obstacle_direction_topic = self.get_parameter(
             'obstacle_direction_topic'
         ).value
-        self.emergency_stop_topic = self.get_parameter(
-            'emergency_stop_topic'
-        ).value
+
         self.direction_topic = self.get_parameter('direction_topic').value
         self.body_frame = self.get_parameter('body_frame').value
         self.input_timeout_seconds = float(
@@ -92,17 +86,11 @@ class RobotBrain(Node):
             self.on_obstacle_direction,
             direction_qos,
         )
-        self.emergency_stop_subscription = self.create_subscription(
-            Bool,
-            self.emergency_stop_topic,
-            self.on_emergency_stop,
-            direction_qos,
-        )
+
         self.timer = self.create_timer(0.1, self.publish_control_direction)
         self.publish_control_direction()
         self.get_logger().info(
             f'Arbitrage {self.pose_topic}, {self.obstacle_direction_topic} '
-            f'et {self.emergency_stop_topic} -> {self.direction_topic}.'
         )
 
     def on_pose(self, message: Odometry) -> None:
@@ -176,17 +164,10 @@ class RobotBrain(Node):
         self.last_direction_time = time.monotonic()
         self.warned_invalid_direction = False
 
-    def on_emergency_stop(self, message: Bool) -> None:
-        self.emergency_stop = message.data
-        self.last_emergency_stop_time = time.monotonic()
 
     def publish_control_direction(self) -> None:
         now = time.monotonic()
-        stop_is_fresh = (
-            self.last_emergency_stop_time is not None
-            and now - self.last_emergency_stop_time
-            <= self.input_timeout_seconds
-        )
+
         pose_is_fresh = (
             self.last_pose_time is not None
             and now - self.last_pose_time <= self.input_timeout_seconds
@@ -196,13 +177,7 @@ class RobotBrain(Node):
             and now - self.last_direction_time <= self.input_timeout_seconds
         )
 
-        if self.emergency_stop is True:
-            direction = STOP_DIRECTION
-            reason = 'arrêt d’urgence actif'
-        elif not stop_is_fresh:
-            direction = STOP_DIRECTION
-            reason = 'état d’arrêt d’urgence absent ou périmé'
-        elif not pose_is_fresh:
+        if not pose_is_fresh:
             direction = STOP_DIRECTION
             reason = 'pose estimée absente, invalide ou périmée'
         elif not direction_is_fresh or self.last_direction is None:

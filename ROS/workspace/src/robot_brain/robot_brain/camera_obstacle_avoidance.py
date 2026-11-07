@@ -32,24 +32,20 @@ class CameraObstacleAvoidance(Node):
 
     def __init__(self) -> None:
         super().__init__('camera_obstacle_avoidance')
-        self.declare_parameter('image_topic', '/camera/image')  # réception de la caméra
+        self.declare_parameter('image_topic', '/input/image')
 
         self.declare_parameter(
             'direction_topic',
             '/robot/obstacle_direction',
         )
-        self.declare_parameter(
-            'emergency_stop_topic', '/safety/emergency_stop'
-        ) # arrêt d'urgence
+
         self.declare_parameter('base_frame', 'base_link')
         self.declare_parameter('minimum_time_to_contact', 2.0)
         self.declare_parameter('image_timeout_seconds', 0.5)
 
         self.image_topic = self.get_parameter('image_topic').value
         self.direction_topic = self.get_parameter('direction_topic').value
-        self.emergency_stop_topic = self.get_parameter(
-            'emergency_stop_topic'
-        ).value
+        
         self.base_frame = self.get_parameter('base_frame').value
         self.minimum_time_to_contact = float(
             self.get_parameter('minimum_time_to_contact').value
@@ -87,17 +83,7 @@ class CameraObstacleAvoidance(Node):
             self.on_image,
             qos_profile_sensor_data,
         )
-        emergency_qos = QoSProfile(
-            depth=1,
-            reliability=ReliabilityPolicy.RELIABLE,
-            durability=DurabilityPolicy.TRANSIENT_LOCAL,
-        )
-        self.stop_subscription = self.create_subscription(
-            Bool,
-            self.emergency_stop_topic,
-            self.on_emergency_stop,
-            emergency_qos,
-        )
+
         self.timeout_timer = self.create_timer(
             min(0.1, self.image_timeout_seconds / 2.0),
             self.check_image_timeout,
@@ -189,11 +175,6 @@ class CameraObstacleAvoidance(Node):
         )
         self.publish_direction(direction)
 
-    def on_emergency_stop(self, message: Bool) -> None:
-        self.emergency_stop = message.data
-        if self.emergency_stop:
-            self.publish_direction((0.0, 0.0, 0.0))
-
     def check_image_timeout(self) -> None:
         if (
             self.last_image_time is None
@@ -208,8 +189,6 @@ class CameraObstacleAvoidance(Node):
         self,
         direction: tuple[float, float, float],
     ) -> None:
-        if self.emergency_stop:
-            direction = (0.0, 0.0, 0.0)
 
         message = Vector3Stamped()
         message.header.stamp = self.get_clock().now().to_msg()
