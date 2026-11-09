@@ -13,7 +13,7 @@ using RosMessageTypes.BuiltinInterfaces;
 public class IMU : MonoBehaviour
 {
     [Header("Topic ROS")]
-    public string topicName = "/imu/data";
+    public string topicName = "/input/imu";
     public string frameId = "imu_link";
     [Tooltip("Période de publication en secondes (ex: 0.02 = 50 Hz)")]
     public float publishPeriod = 0.02f;

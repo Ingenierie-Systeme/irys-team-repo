@@ -3,23 +3,26 @@
 ## Architecture du contrôle du robot
 
 - reception des informations des capteurs (codes exemples dans `sensor_subscriber`)
-    - IMU : `/imu/data`
-    - Caméra : `/camera/image`
-    - GNSS : `/gnss/fix`
-    - Capteur de pression hydrostatique : `/pressure` (`sensor_msgs/msg/FluidPressure`, Pa absolus)
+  - IMU : `/input/imu`
+  - Magnétomètre : `/input/mag`
+  - Caméra : `/input/image`
+  - GNSS : `/input/gnss` (non présent sur le robot réel)
+  - Capteur de pression hydrostatique : `/input/depth`
 - estimation de l'état au fil du temps (package `robot_pose`)
-    - filtre de Kalman
-    - recalibration au GPS en surface
-    - publication sur topic `/robot/pose` (position, vitesse et inclinaison)
+  - filtre de Kalman
+  - recalibration au GPS en surface
+  - publication sur topic `/robot/pose` (position, vitesse et inclinaison)
 - estimation de la sécurité et navigation (package `robot_brain`)
-    - estimation heuristique du temps avant collision dans trois secteurs caméra
-    - choix d'une direction locale pour éviter un obstacle visible
-    - arrêt d'urgence si obstacle trop proche via flux optique (`robot_brain/optical_flow_emergency_stop.py`)
-    - arbitrage des entrées de perception et de l'état estimé avant commande
-    - publication sur le topic `/robot/direction` (direction vers laquelle le robot doit se diriger, en prenant en compte sa manoeuvrabilité limité)
+  - estimation heuristique du temps avant collision dans trois secteurs caméra
+  - choix d'une direction locale pour éviter un obstacle visible
+  - arrêt d'urgence si obstacle trop proche via flux optique (`robot_brain/optical_flow_emergency_stop.py`)
+  - arbitrage des entrées de perception et de l'état estimé avant commande
+  - publication sur le topic `/robot/direction` (direction vers laquelle le robot doit se diriger, en prenant en compte sa manoeuvrabilité limité)
 - commandes des servo-moteurs (package `robot_control`)
-    - convertit la direction en consignes pour les servo-moteurs
-    - consignes des servos (nageoire puis masse) : `/output/servos`
+  - convertit la direction en consignes pour les servo-moteurs
+  - consignes des servos (nageoire puis masse) : `/output/servos`
+
+![rosgraph](ROS/workspace/src/rosgraph.png)
 
 ### packages contrôle global du robot
 

@@ -17,7 +17,7 @@ using RosMessageTypes.BuiltinInterfaces;
 public class GNSS : MonoBehaviour
 {
     [Header("Topic ROS")]
-    public string topicName = "/gnss/fix";
+    public string topicName = "/input/gnss";
     public string frameId = "gnss_link";
 
     [Header("Origine géographique de la scène")]

@@ -12,7 +12,7 @@ using RosMessageTypes.Std;
 public class pressure : MonoBehaviour
 {
     [Header("Topic ROS")]
-    public string topicName = "/pressure";
+    public string topicName = "/input/depth";
     public string frameId = "pressure_link";
     [Min(0.01f)]
     public float publishPeriod = 0.1f;
