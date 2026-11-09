@@ -1,4 +1,5 @@
 from launch import LaunchDescription
+from launch_ros.actions import Node
 from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
@@ -6,21 +7,28 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
-
 def generate_launch_description():
-    tcp_ip = LaunchConfiguration('tcp_ip')
-    tcp_port = LaunchConfiguration('tcp_port')
 
     return LaunchDescription([
-        DeclareLaunchArgument(
-            'tcp_ip',
-            default_value='0.0.0.0',
-            description='Adresse d’écoute TCP de ROS-TCP-Endpoint.',
+        Node(package="navigator", output="screen",
+            executable="navigator",
+            name="navigator",
         ),
-        DeclareLaunchArgument(
-            'tcp_port',
-            default_value='10000',
-            description='Port d’écoute TCP de ROS-TCP-Endpoint.',
+        Node(package="navigator", output="screen",
+            executable="camera",
+            name="camera",
+        ),
+        Node(package="navigator", output="screen",
+            executable="rc",
+            name="rc",
+        ),
+        Node(package="navigator", output="screen",
+            executable="baro",
+            name="baro",
+        ),
+        Node(package="navigator", output="screen",
+            executable="fusion",
+            name="fusion",
         ),
         DeclareLaunchArgument(
             'start_obstacle_monitor',
@@ -47,34 +55,9 @@ def generate_launch_description():
             ),
         ),
         DeclareLaunchArgument(
-            'start_crsf_receiver',
-            default_value='false',
-            description='Lire le récepteur TBS Crossfire en CRSF série.',
-        ),
-        DeclareLaunchArgument(
-            'crsf_serial_device',
-            default_value='/dev/serial0',
-            description='Port série utilisé par le récepteur CRSF.',
-        ),
-        DeclareLaunchArgument(
             'start_state_estimator',
             default_value='true',
             description='Démarrer l’estimateur d’état du robot.',
-        ),
-        DeclareLaunchArgument(
-            'start_imu_fusion',
-            default_value='true',
-            description='Démarrer la fusion IMU/magnétomètre.',
-        ),
-        Node(
-            package='ros_tcp_endpoint',
-            executable='default_server_endpoint',
-            name='unity_endpoint',
-            output='screen',
-            parameters=[{
-                'ROS_IP': tcp_ip,
-                'ROS_TCP_PORT': ParameterValue(tcp_port, value_type=int),
-            }],
         ),
         Node(
             package='robot_brain',
@@ -110,27 +93,6 @@ def generate_launch_description():
             output='screen',
             condition=IfCondition(
                 LaunchConfiguration('start_servo_controller')
-            ),
-        ),
-        Node(
-            package='robot_control',
-            executable='crsf_joy_bridge',
-            name='crsf_joy_bridge',
-            output='screen',
-            condition=IfCondition(
-                LaunchConfiguration('start_crsf_receiver')
-            ),
-            parameters=[{
-                'serial_device': LaunchConfiguration('crsf_serial_device'),
-            }],
-        ),
-        Node(
-            package='navigator',
-            executable='fusion',
-            name='imu_fusion',
-            output='screen',
-            condition=IfCondition(
-                LaunchConfiguration('start_imu_fusion')
             ),
         ),
         Node(
