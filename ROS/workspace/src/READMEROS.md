@@ -2,38 +2,83 @@
 
 ## Architecture du contrôle du robot
 
-- réception des informations des capteurs (codes exemples dans `sensor_subscriber`)
-    - IMU : `/input/imu`
-    - capteur magnétique : `/input/mag`
-    - Caméra : `/input/camera`
-    - GNSS : `/input/gnss`
-    - Capteur de pression hydrostatique : `/input/pressure` (`sensor_msgs/msg/FluidPressure`, Pa absolus)
+- reception des informations des capteurs (codes exemples dans `sensor_subscriber`)
+  - IMU : `/input/imu`
+  - Magnétomètre : `/input/mag`
+  - Caméra : `/input/image`
+  - GNSS : `/input/gnss` (non présent sur le robot réel)
+  - Capteur de pression hydrostatique : `/input/depth`
 - estimation de l'état au fil du temps (package `robot_pose`)
-    - filtre de Kalman
-    - recalibration au GPS en surface
-    - publication sur topic `/robot/pose` (position, vitesse et inclinaison)
+  - filtre de Kalman
+  - recalibration au GPS en surface
+  - publication sur topic `/robot/pose` (position, vitesse et inclinaison)
 - estimation de la sécurité et navigation (package `robot_brain`)
-    - estimation heuristique du temps avant collision dans trois secteurs caméra
-    - choix d'une direction locale pour éviter un obstacle visible
-    - arrêt d'urgence si obstacle trop proche via flux optique (`robot_brain/optical_flow_emergency_stop.py`)
-    - arbitrage des entrées de perception et de l'état estimé avant commande
-    - publication sur le topic `/robot/direction` (direction vers laquelle le robot doit se diriger, en prenant en compte sa manoeuvrabilité limité)
-- commandes des servo-moteurs (package `robot_control`) `/output/servos` (Float32MultiArray)
-    - convertit la direction en consignes pour les servo-moteurs
-    - nageoire pour le déplacement : `/output/servos`[0]
-    - masse mobile pour l'inclinaison : `/output/servos`[1]
+  - estimation heuristique du temps avant collision dans trois secteurs caméra
+  - choix d'une direction locale pour éviter un obstacle visible
+  - arrêt d'urgence si obstacle trop proche via flux optique (`robot_brain/optical_flow_emergency_stop.py`)
+  - arbitrage des entrées de perception et de l'état estimé avant commande
+  - publication sur le topic `/robot/direction` (direction vers laquelle le robot doit se diriger, en prenant en compte sa manoeuvrabilité limité)
+- commandes des servo-moteurs (package `robot_control`)
+  - convertit la direction en consignes pour les servo-moteurs
+  - consignes des servos (nageoire puis masse) : `/output/servos`
+
+![rosgraph](ROS/workspace/src/rosgraph.png)
+
+### packages contrôle global du robot
+
+- `robot_brain`
+- `robot_control`
+- `robot_pose`
+
+### packages supplémentaires pour fonctionner avec la simulation Unity 
+
+- `ros_tcp_endpoint`
+- `sensor_subscriber`
+- `robot_bringup`
+
+### package supplémentaire pour fonctionner avec le robot réel
+
+- `navigator`
 
 ## Comportement du robot
 
 Idéalement / théoriquement : 
+
 - SLAM de grottes sous-marine pour explorer la zone à la place de plongeurs
 
 Compte tenu des limitations du projet (pas de source de lumière embarquée, pas de Lidar):
+
 - tours dans le bassin ROB en autonomie pour tester les lois de commandes, les sécurités et l'assemblage du robot
 
+## modification des fichiers du robot
 
-## Compiler et lancer les noeuds
-Compiler le workspace depuis `ROS/workspace` après avoir installé et sourcé une distribution ROS 2 :
+synchronisation de tous les noeuds et fichiers utiles du robot (robot -> ordinateur)
+
+```bash
+rsync -av irysbot@pi4.local:~/ros2_ws/src/ src/
+```
+
+ordinateur -> robot (synchronisation des finchiers utiles uniquement)
+
+```bash
+rsync -av --include-from='src/filtre.txt' --exclude='*' src/ irysbot@pi4.local:~/ros2_ws/src/
+```
+
+## modification des fichiers du robot
+
+synchronisation de tous les noeuds et fichiers utiles du robot (robot -> ordinateur)
+
+## ROS-TCP-Endpoint
+
+Le workspace inclut le paquet officiel Unity `ros_tcp_endpoint` comme sous-module
+Git, sur la branche ROS 2 `main-ros2`. Après un nouveau clonage du dépôt :
+
+```bash
+git submodule update --init --recursive
+```
+
+Compiler le workspace depuis `ROS/workspace` après avoir installé et sourcé une
+distribution ROS 2 :
 
 ```bash
 source /opt/ros/$ROS_DISTRO/setup.bash
@@ -70,8 +115,8 @@ avec `start_robot_brain:=false`. Le contrôleur servo peut être désactivé ave
 
 ## Estimation de l'état du robot
 
-Le nœud `robot_pose/state_estimator` fusionne l'IMU `/input/imu`, les fixes GNSS
-`/input/gnss` et le capteur de pression `/input/pressure`. Il propage position et
+Le nœud `robot_pose/state_estimator` fusionne l'IMU `/state/imu`, les fixes GNSS
+`/gnss/fix` et le capteur de pression `/pressure`. Il propage position et
 vitesse en coordonnées ENU à partir de l'accélération IMU, corrige la position
 par filtre de Kalman avec le GNSS et corrige spécifiquement l'altitude `z` avec
 la profondeur déduite de la pression hydrostatique. La première mesure de
@@ -82,6 +127,13 @@ un `z` ENU négatif. La densité d'eau vaut 1000 kg/m³ par défaut et se règle
 avec `water_density_kg_m3`. Si la variance ROS est nulle ou absente, le filtre
 utilise `default_pressure_depth_variance` (1 m² par défaut) ; sinon il convertit
 la variance de pression en variance de profondeur.
+
+Le nœud `navigator/fusion` combine les mesures brutes `/input/imu` et
+`/input/mag` et publie l'attitude ENU fusionnée avec les mesures inertielles
+sur `/state/imu`. L'estimateur consomme ce topic par défaut. Les launch files
+robot démarrent la fusion automatiquement ; `start_imu_fusion:=false` permet
+de la désactiver si une autre source publie déjà un `sensor_msgs/msg/Imu`
+complet sur `/state/imu`.
 
 La publication `nav_msgs/msg/Odometry` sur `/robot/pose` utilise `odom` comme
 repère monde et `base_link` comme repère robot. Les coordonnées GNSS sont relatives à l'origine par défaut
@@ -180,18 +232,41 @@ le `PointCloud2` simulé sur `/lidar/points`) et l'installation d'un capteur
 
 Le nœud `robot_control/servo_command_publisher` lit le
 `geometry_msgs/msg/Vector3Stamped` de `/robot/direction` et publie un
-`std_msgs/msg/Float32MultiArray` sur `/output/servos`, à 50 Hz. L'élément `[0]`
-contient la consigne de nageoire en degrés et l'élément `[1]` la consigne de
-masse mobile en degrés. En l'absence de nouvelle direction pendant 0,5 seconde,
-il applique une consigne nulle ; ce délai se règle avec
-`direction_timeout_seconds`. L'angle
-de la nageoire suit le cap du vecteur `(x, y)` avec une
-oscillation sinusoïdale d'amplitude maximale 40° et de période 5 secondes.
-L'amplitude suit la norme du vecteur (les vecteurs directionnels actuels ont
-une norme de 1 et l'arrêt une norme de 0) ; la consigne est limitée à ±90°.
-L'angle de la masse est proportionnel à `x`, borné à ±50° ; une direction
-nulle recentre les deux servos. Dans Unity, `masse_mobile_AB` convertit la
-commande en déplacement sur l'axe Z de l'articulation prismatique : ±50°
+`std_msgs/msg/Float32MultiArray` sur `/output/servos`, à 50 Hz. Les deux
+valeurs sont normalisées entre -1 et 1, dans l'ordre nageoire puis masse.
+En l'absence de nouvelle direction pendant 1 seconde, il applique une
+consigne nulle ; ce délai se règle avec `direction_timeout_seconds`. En
+autonomie, l'angle de la nageoire suit le cap du vecteur `(x, y)` avec une
+oscillation sinusoïdale d'amplitude maximale 60° et de période 3 secondes.
+L'angle est limité à ±85° ; celui de la masse est proportionnel à `x`, borné
+à ±50°. Une direction nulle recentre les deux servos.
+
+Le même nœud écoute `std_msgs/msg/Float32MultiArray` sur `/input/rc`, publié
+par le package `navigator` de la Navigator. Avec la configuration par défaut,
+`data[2]` (canal 3, THR) règle l'amplitude de l'oscillation sinusoïdale de la
+nageoire, `data[3]` (canal 4, AIL) règle la masse et `data[4]` (canal 5,
+FULLRUD) active la télécommande. Switch OFF, les commandes autonomes restent
+actives ; switch ON, les consignes RC prennent la main, y compris si l'arrêt
+d'urgence est actif. Le signal RC doit être renouvelé avant expiration du
+délai `rc_timeout_seconds` (2 secondes par défaut) ; sinon l'arbitrage rend la
+main au contrôle autonome. Les canaux doivent être normalisés entre -1 et 1.
+Les indices, le topic et les délais sont configurables :
+
+```bash
+ros2 run robot_control servo_command_publisher --ros-args \
+  -p rc_topic:=/input/rc \
+  -p throttle_channel_index:=2 \
+  -p aileron_channel_index:=3 \
+  -p takeover_channel_index:=4 \
+  -p rc_timeout_seconds:=0.5
+```
+
+Hors takeover RC, le contrôleur neutralise les deux servos si l'arrêt d'urgence
+est actif, ou si son état `/safety/emergency_stop` est absent ou périmé. Pour
+inverser la polarité du switch FULLRUD, utiliser `takeover_when_high:=false`.
+Le nœud servo reste l'unique publisher de `/output/servos`, afin que les deux
+modes ne se disputent pas les commandes. Dans Unity, `masse_mobile_AB` convertit
+la commande en déplacement sur l'axe Z de l'articulation prismatique : ±50°
 correspond à ±`courseMax` (0,1 m par défaut). Le déplacement est limité par
 `vitesse` et la masse revient au centre si aucune commande n'arrive pendant
 `delaiCommandeSecondes` (1 s par défaut).
@@ -199,3 +274,16 @@ correspond à ±`courseMax` (0,1 m par défaut). Le déplacement est limité par
 ```bash
 ros2 run robot_control servo_command_publisher
 ```
+
+Avec la Navigator, démarrer le nœud qui publie `/input/rc` avant le contrôleur
+servo, puis vérifier les canaux avec `ros2 topic echo /input/rc`. Configurer
+le failsafe du récepteur pour que FULLRUD désactive la prise de contrôle ; le
+délai RC ne détecte que l'absence de nouvelles trames, pas un état failsafe
+transmis continuellement.
+
+## Création d'un package
+
+```bash
+ros2 pkg create --build-type ament_python <nom_package>
+```
+

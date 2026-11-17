@@ -173,17 +173,17 @@ class CameraObstacleAvoidance(Node):
         # Mise à jour pour la prochaine frame
         self.previous_gray = gray
         self.previous_image_time = now
-        self.p0 = good_new.reshape(-1, 1, 2)
-
-    def reset_vision(self, now: float, gray_img=None, points=None) -> None:
-        """Méthode utilitaire pour réinitialiser l'état en cas d'erreur/manque de données."""
-        self.previous_gray = gray_img
-        self.previous_image_time = now if gray_img is not None else None
-        if points is not None and len(points) > 0:
-            self.p0 = points.reshape(-1, 1, 2)
-        else:
-            self.p0 = None
-        self.publish_direction((0.0, 0.0, 0.0))
+        try:
+            sectors = estimate_sector_time_to_contact(flow / elapsed)
+        except ValueError as error:
+            self.get_logger().error(f'Image inutilisable : {error}')
+            self.publish_direction((0.0, 0.0, 0.0))
+            return
+        direction = choose_safe_direction(
+            sectors,
+            self.minimum_time_to_contact,
+        )
+        self.publish_direction(direction)
 
     def on_emergency_stop(self, message: Bool) -> None:
         self.emergency_stop = message.data
@@ -200,6 +200,10 @@ class CameraObstacleAvoidance(Node):
             self.p0 = None
             self.publish_direction((0.0, 0.0, 0.0))
 
+    def publish_direction(
+        self,
+        direction: tuple[float, float, float],
+    ) -> None:
     def publish_direction(self, direction: tuple[float, float, float]) -> None:
         if self.emergency_stop:
             direction = (0.0, 0.0, 0.0)

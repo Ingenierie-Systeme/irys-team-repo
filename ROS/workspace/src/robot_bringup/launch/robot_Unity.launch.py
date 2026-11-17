@@ -51,6 +51,11 @@ def generate_launch_description():
             default_value='true',
             description='Démarrer l’estimateur d’état du robot.',
         ),
+        DeclareLaunchArgument(
+            'start_imu_fusion',
+            default_value='true',
+            description='Démarrer la fusion IMU/magnétomètre.',
+        ),
         Node(
             package='ros_tcp_endpoint',
             executable='default_server_endpoint',
@@ -95,6 +100,16 @@ def generate_launch_description():
             output='screen',
             condition=IfCondition(
                 LaunchConfiguration('start_servo_controller')
+            ),
+        ),
+
+        Node(
+            package='navigator',
+            executable='fusion',
+            name='imu_fusion',
+            output='screen',
+            condition=IfCondition(
+                LaunchConfiguration('start_imu_fusion')
             ),
         ),
         Node(
