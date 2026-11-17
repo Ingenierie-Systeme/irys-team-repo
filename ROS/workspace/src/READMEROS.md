@@ -17,7 +17,7 @@
   - choix d'une direction locale pour éviter un obstacle visible
   - arrêt d'urgence si obstacle trop proche via flux optique (`robot_brain/optical_flow_emergency_stop.py`)
   - arbitrage des entrées de perception et de l'état estimé avant commande
-  - publication sur le topic `/robot/direction` (direction vers laquelle le robot doit se diriger, en prenant en compte sa manoeuvrabilité limité)
+  - publication sur le topic `/commande/direction` (direction vers laquelle le robot doit se diriger, en prenant en compte sa manoeuvrabilité limité)
 - commandes des servo-moteurs (package `robot_control`)
   - convertit la direction en consignes pour les servo-moteurs
   - consignes des servos (nageoire puis masse) : `/output/servos`
@@ -116,15 +116,13 @@ avec `start_robot_brain:=false`. Le contrôleur servo peut être désactivé ave
 ## Estimation de l'état du robot
 
 Le nœud `robot_pose/state_estimator` fusionne l'IMU `/state/imu`, les fixes GNSS
-`/gnss/fix` et le capteur de pression `/pressure`. Il propage position et
+`/input/gnss` et le capteur de pression `/input/depth`. Il propage position et
 vitesse en coordonnées ENU à partir de l'accélération IMU, corrige la position
 par filtre de Kalman avec le GNSS et corrige spécifiquement l'altitude `z` avec
 la profondeur déduite de la pression hydrostatique. La première mesure de
 pression valide sert de référence de surface : le robot doit donc être à la
-surface au démarrage du nœud. La pression étant absolue, la profondeur est
-calculée par `(pression - référence_surface) / (densité_eau × g)` et devient
-un `z` ENU négatif. La densité d'eau vaut 1000 kg/m³ par défaut et se règle
-avec `water_density_kg_m3`. Si la variance ROS est nulle ou absente, le filtre
+surface au démarrage du nœud. La profondeur est donnée par le capteur de pression.
+La densité d'eau vaut 1000 kg/m³ par défaut et se règle avec `water_density_kg_m3`. Si la variance ROS est nulle ou absente, le filtre
 utilise `default_pressure_depth_variance` (1 m² par défaut) ; sinon il convertit
 la variance de pression en variance de profondeur.
 
@@ -175,7 +173,7 @@ arrêt actif. Le seuil TTC est configurable (2 secondes par défaut) :
 
 ```bash
 ros2 run robot_brain optical_flow_emergency_stop --ros-args \
-  -p image_topic:=/input/camera \
+  -p image_topic:=/input/image \
   -p stop_topic:=/safety/emergency_stop \
   -p ttc_threshold_seconds:=2.0
 ```
@@ -216,7 +214,7 @@ Le nœud d'évitement caméra peut aussi s'utiliser seul en publiant sa proposit
 
 ```bash
 ros2 run robot_brain camera_obstacle_avoidance --ros-args \
-  -p image_topic:=/input/camera \
+  -p image_topic:=/input/image \
   -p direction_topic:=/robot/obstacle_direction \
   -p minimum_time_to_contact:=2.0
 ```

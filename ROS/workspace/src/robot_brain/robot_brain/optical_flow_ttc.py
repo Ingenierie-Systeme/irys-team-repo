@@ -5,6 +5,7 @@ import numpy as np
 
 MIN_EXPANSION_RATE = 0.01
 MIN_VALID_PIXELS = 12
+MIN_VALID_SPARSE_POINTS = 3
 
 
 def _normalized_expansion_rates(flow: np.ndarray) -> tuple[
@@ -83,6 +84,74 @@ def estimate_sector_time_to_contact(
         ]
         minimum_pixels = max(MIN_VALID_PIXELS, int(roi.size * 0.001))
         if rates.size < minimum_pixels:
+            time_to_contact.append(None)
+        else:
+            time_to_contact.append(
+                1.0 / float(np.percentile(rates, 75))
+            )
+
+    return tuple(time_to_contact)
+
+
+def estimate_sector_time_to_contact_sparse(
+    points: np.ndarray,
+    velocities: np.ndarray,
+    image_width: int,
+    image_height: int,
+) -> tuple[float | None, float | None, float | None]:
+    """Estime les TTC gauche, centre et droit à partir de points Lucas-Kanade."""
+    points = np.asarray(points, dtype=np.float64)
+    velocities = np.asarray(velocities, dtype=np.float64)
+    if (
+        points.ndim not in (2, 3)
+        or points.shape[-1] != 2
+        or (points.ndim == 3 and points.shape[1] != 1)
+    ):
+        raise ValueError(
+            'points doit avoir la forme (N, 2) ou (N, 1, 2).'
+        )
+    if velocities.shape != points.shape:
+        raise ValueError('velocities doit avoir la même forme que points.')
+    if image_width < 3 or image_height < 2:
+        raise ValueError('image_width et image_height doivent être au moins '
+                         '3 et 2.')
+
+    points = points.reshape(-1, 2)
+    velocities = velocities.reshape(-1, 2)
+
+    half_width = image_width / 2.0
+    half_height = image_height / 2.0
+    normalized_x = (points[:, 0] - (image_width - 1) / 2.0) / half_width
+    normalized_y = (points[:, 1] - (image_height - 1) / 2.0) / half_height
+    normalized_velocity_x = velocities[:, 0] / half_width
+    normalized_velocity_y = velocities[:, 1] / half_height
+    radius_squared = normalized_x**2 + normalized_y**2
+
+    expansion_rate = np.full(points.shape[0], np.nan, dtype=np.float64)
+    valid_radius = radius_squared > 1e-6
+    np.divide(
+        normalized_x * normalized_velocity_x
+        + normalized_y * normalized_velocity_y,
+        radius_squared,
+        out=expansion_rate,
+        where=valid_radius,
+    )
+
+    sectors = (
+        (normalized_x >= -0.8) & (normalized_x < -0.8 / 3.0),
+        (normalized_x >= -0.8 / 3.0)
+        & (normalized_x <= 0.8 / 3.0),
+        (normalized_x > 0.8 / 3.0) & (normalized_x <= 0.8),
+    )
+    in_vertical_roi = np.abs(normalized_y) <= 0.8
+    time_to_contact: list[float | None] = []
+    for sector in sectors:
+        roi = sector & in_vertical_roi
+        rates = expansion_rate[
+            roi & np.isfinite(expansion_rate)
+            & (expansion_rate > MIN_EXPANSION_RATE)
+        ]
+        if rates.size < MIN_VALID_SPARSE_POINTS:
             time_to_contact.append(None)
         else:
             time_to_contact.append(

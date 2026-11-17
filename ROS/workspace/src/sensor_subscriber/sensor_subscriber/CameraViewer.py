@@ -17,7 +17,7 @@ class CameraViewer(Node):
     def __init__(self):
         super().__init__('camera_viewer')
 
-        self.declare_parameter('topic', '/input/camera')
+        self.declare_parameter('topic', '/input/image')
         topic = self.get_parameter('topic').value
 
         self.bridge = CvBridge()

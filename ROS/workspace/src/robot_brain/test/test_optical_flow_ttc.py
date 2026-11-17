@@ -5,6 +5,7 @@ import pytest
 from robot_brain.optical_flow_ttc import (
     choose_safe_direction,
     estimate_sector_time_to_contact,
+    estimate_sector_time_to_contact_sparse,
     estimate_time_to_contact,
 )
 
@@ -45,6 +46,73 @@ def test_sector_ttc_detects_expansion_on_left():
     assert left_ttc == pytest.approx(0.25)
     assert center_ttc is None
     assert right_ttc is None
+
+
+def test_sparse_sector_ttc_detects_radial_expansion():
+    width, height = 90, 60
+    center_x = (width - 1) / 2.0
+    center_y = (height - 1) / 2.0
+    points = np.array([
+        [x, y]
+        for x in (10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0)
+        for y in (10.0, 30.0, 50.0)
+    ])
+    velocities = 2.0 * (points - [center_x, center_y])
+
+    ttcs = estimate_sector_time_to_contact_sparse(
+        points,
+        velocities,
+        image_width=width,
+        image_height=height,
+    )
+
+    assert ttcs == pytest.approx((0.5, 0.5, 0.5))
+
+
+def test_sparse_sector_ttc_accepts_lucas_kanade_point_shape():
+    width, height = 90, 60
+    points = np.array([
+        [[20.0, 10.0]],
+        [[25.0, 30.0]],
+        [[30.0, 50.0]],
+    ])
+    center = np.array([(width - 1) / 2.0, (height - 1) / 2.0])
+    velocities = 4.0 * (points - center)
+
+    ttcs = estimate_sector_time_to_contact_sparse(
+        points,
+        velocities,
+        image_width=width,
+        image_height=height,
+    )
+
+    assert ttcs[0] == pytest.approx(0.25)
+    assert ttcs[1:] == (None, None)
+
+
+def test_sparse_sector_ttc_ignores_non_expanding_points():
+    points = np.array([
+        [10.0, 10.0],
+        [20.0, 30.0],
+        [30.0, 50.0],
+    ])
+
+    assert estimate_sector_time_to_contact_sparse(
+        points,
+        np.zeros_like(points),
+        image_width=90,
+        image_height=60,
+    ) == (None, None, None)
+
+
+def test_sparse_sector_ttc_rejects_mismatched_point_and_velocity_shapes():
+    with pytest.raises(ValueError, match='même forme'):
+        estimate_sector_time_to_contact_sparse(
+            np.zeros((3, 2)),
+            np.zeros((2, 2)),
+            image_width=90,
+            image_height=60,
+        )
 
 
 def test_direction_keeps_course_when_center_is_clear():
